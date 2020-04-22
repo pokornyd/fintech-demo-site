@@ -10,6 +10,11 @@ export const getBlogCodenameFromQuery = (query: Record<string, string | string[]
   return (query.name) as string;
 };
 
+export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
+  return (query.codename) as string;
+};
+
+
 export const addClassToPTags = (html: string, className: string) => {
   const replacement = `<p class="${className}">`;
   return html.replace(/< *p *>/g, replacement);

@@ -64,7 +64,7 @@ export function getElementRenderer<T extends { readonly value: any }>(elementCod
           <Render
             ref={this.hoverable}
             {...this.props}
-            value={this.props.data[elementCodename].value}
+            value={elementCodename == 'system.codename' ? this.props.data.system.codename  : this.props.data[elementCodename].value}
           />
           {this.state.showOverlay && (
             <EditElementOverlay

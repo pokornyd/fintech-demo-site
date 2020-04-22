@@ -20,18 +20,14 @@ const propTypes: ValidationMap<IArticleSectionItemProps> = {
   data: PropTypes.any.isRequired,
 };
 
-
-
 const ArticleTitle = getItemElementRenderer(
   'title',
-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
-    <a
-      ref={ref}
+  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
+    <h4
       className="article-title"
-      href="#!"
     >
       {value}
-    </a>
+    </h4>
   )),
 );
 
@@ -47,6 +43,19 @@ const ArticleContent = getItemElementRenderer(
   )),
 );
 
+const ArticleReadMore = getItemElementRenderer(
+  'system.codename',
+    React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+      <a
+        ref={ref}
+        className="mb-0"
+        href={'/article?codename='+ value}
+      >
+        READ MORE
+      </a>
+    )),
+  );
+
 export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) => {
   return (
     <div
@@ -58,6 +67,9 @@ export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) =
             data={data}
           />
           <ArticleContent
+            data={data}
+          />
+          <ArticleReadMore
             data={data}
           />
         </div>

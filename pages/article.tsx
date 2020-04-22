@@ -25,6 +25,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
 import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
+import { getCodenameFromQuery } from '../utilities/utils';
 
 
 type Content = {
@@ -40,6 +41,7 @@ type ArticlesProps = {
   readonly isPreview: boolean;
   readonly removeScrollbar: boolean;
   readonly projectId: string;
+ 
 }
 
 const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any> } = {
@@ -72,7 +74,7 @@ const Articles: NextFC<ArticlesProps> = ({
     navigation,
     projectId,
     removeScrollbar,
-    sections,
+    sections
   }) => {
   
     return (
@@ -142,7 +144,10 @@ const Articles: NextFC<ArticlesProps> = ({
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
     });
     const { debug: forget1, ...content } = await client.item('article_detail').withParameter('depth', '10').getPromise();
-    const { items } = await client.items().type('article').equalsFilter('system.codename','not_only_your_insurance_partner').limitParameter(1).getPromise(); 
+
+    const codename = getCodenameFromQuery(query);
+    
+    const { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise(); 
     
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
