@@ -1,0 +1,13 @@
+node_modules
+.next
+.idea/*
+!.idea/codeStyleSettings.xml
+!.idea/typescript-compiler.xml
+!.idea/inspectionProfiles
+!.idea/jsLibraryMappings.xml
+!.idea/misc.xml
+!.idea/runConfigurations
+!.idea/libraries
+!.idea/codeStyles
+
+apiKeys.json

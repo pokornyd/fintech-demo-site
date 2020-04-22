@@ -1,0 +1,54 @@
+{
+	"name": "fintech-demo-site",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"dev": "cross-env NODE_ENV=local&& ts-node --files server.ts",
+		"build": "next build",
+		"start": "ts-node --files server.ts",
+		"tslint": "tslint --project tsconfig.json -e \"./node_modules/**\" \"./**/*.ts?(x)\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:KenticoInternal/fintech-demo-site.git"
+	},
+	"author": "Vilém Jeniš",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/KenticoInternal/fintech-demo-site/issues"
+	},
+	"homepage": "https://github.com/KenticoInternal/fintech-demo-site#readme",
+	"dependencies": {
+		"@types/classnames": "2.2.7",
+		"@types/next": "8.0.1",
+		"@types/react": "16.8.3",
+		"@types/react-dom": "16.8.1",
+		"@types/react-router": "5.0.1",
+		"@zeit/next-css": "1.0.1",
+		"@zeit/next-sass": "1.0.1",
+		"@zeit/next-stylus": "1.0.1",
+		"@zeit/next-typescript": "1.1.1",
+		"classnames": "2.2.6",
+		"cross-fetch": "3.0.3",
+		"isomorphic-unfetch": "3.0.0",
+		"kentico-cloud-delivery": "5.7.2",
+		"next": "8.0.1",
+		"next-compose": "0.0.2",
+		"node-sass": "4.11.0",
+		"path-to-regexp": "3.0.0",
+		"react": "16.8.2",
+		"react-dom": "16.8.2",
+		"react-router": "5.0.1",
+		"react-set-state-usage": "2.0.1",
+		"rxjs": "6.4.0",
+		"stylus": "0.54.5",
+		"ts-node": "8.2.0",
+		"tslint": "5.12.1",
+		"tslint-react": "3.6.0",
+		"typescript": "3.5.1"
+	},
+	"devDependencies": {
+		"cross-env": "^5.2.0"
+	}
+}
