@@ -14,6 +14,7 @@ import { PreLoader } from '../components/PreLoader';
 import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
 import { ArticleSection } from '../components/sections/article/ArticleSection';
 import { ArticleList } from '../components/sections/article/ArticleList';
+import { TopicList } from '../components/sections/topic/TopicList';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
 import {
@@ -31,7 +32,7 @@ type Content = {
   readonly linkedItems: ReadonlyArray<ContentItem>;
 };
 
-type ArticlesProps = {
+type TopicsProps = {
   readonly content: Content;
   readonly navigation: Content;
   readonly brandDetails: Content;
@@ -47,7 +48,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
   'section_articles': ArticleSection,
-  'section_article_list': ArticleList
+//   'section_article_list': ArticleList,
+  'section_topic_list': TopicList
 };
 
 const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
@@ -63,14 +65,14 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
 };
 type ItemMap = { readonly [codename: string]: ContentItem };
 
-const Articles: NextFC<ArticlesProps> = ({
+const Topics: NextFC<TopicsProps> = ({
     brandDetails,
     content,
     isPreview,
     navigation,
     projectId,
     removeScrollbar,
-    sections,
+    sections
   }) => {
   
     return (
@@ -129,7 +131,7 @@ const Articles: NextFC<ArticlesProps> = ({
     );
   };
   
-  Articles.getInitialProps = async ({ query, req }) => {
+  Topics.getInitialProps = async ({ query, req }) => {
     const hostname = req ? req.headers.host : location.hostname;
     const isPreview = Object.hasOwnProperty.call(query, 'preview');
     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
@@ -139,8 +141,11 @@ const Articles: NextFC<ArticlesProps> = ({
       enablePreviewMode: isPreview,
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
     });
-    const { debug: forget1, ...content } = await client.item('articles').withParameter('depth', '10').getPromise();
-    const { items } = await client.items().type('article').getPromise(); // get all articles
+    const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
+    const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
+    const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
+
+    
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
         ...map,
@@ -149,22 +154,30 @@ const Articles: NextFC<ArticlesProps> = ({
     }, {} as ItemMap);
   
     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
-  
+   
     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
+    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list');
 
-    console.log(sections);
+    
+    
+
+    if (topicList) {  
+        var { items } = await client.items().type('topic').getPromise(); // get all topics    
+       topicList.topic = items;
+    }
 
     if (articleSection) {  // top 3 articles    
+      var { items } = await client.items().type('article').getPromise(); // get all articles
       articleSection.article = items;
     }
 
-    if (articleList) {      
-        articleList.article = items; 
+    if (articleList) { 
+        var { items } = await client.items().type('article').getPromise(); // get all articles     
+        articleList.article = await client.items().type('article').getPromise(); 
     }
   
-    const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
-    const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
+
    
   
     return {
@@ -174,9 +187,9 @@ const Articles: NextFC<ArticlesProps> = ({
       navigation,
       projectId,
       removeScrollbar,
-      sections,
+      sections
     };
   };
   
-  export default Articles;
+  export default Topics;
   
