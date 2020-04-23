@@ -52,7 +52,7 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_topic_list': TopicList
 };
 
-const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
+export const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
   console.log('hostname:', hostname);
   return (await (await fetch(`http${hostname.includes('localhost') ? '' : 's'}://${hostname}/api-key/${projectId}`)).json()).key;
 };
@@ -144,6 +144,7 @@ const Topics: NextFC<TopicsProps> = ({
     const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
     const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
+    //const { debug: forget4, ...nestedContent } = await client.items().inFilter("system.type", ["article", "blog"]).getPromise();
 
     
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
@@ -152,19 +153,25 @@ const Topics: NextFC<TopicsProps> = ({
         [contentItem.system.codename]: contentItem,
       };
     }, {} as ItemMap);
+
+    // const nestedLinkedItemsByCodename = nestedContent.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+    //   return {
+    //     ...map,
+    //     [contentItem.system.codename]: contentItem,
+    //   };
+    // }, {} as ItemMap);
   
     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
-   
+    //const nestedSections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => nestedLinkedItemsByCodename[codename]);
+
     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
-    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list');
-
+    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list'); 
     
-    
-
     if (topicList) {  
-        var { items } = await client.items().type('topic').getPromise(); // get all topics    
+        var { items } = await client.items().type('topic').getPromise(); // get all topics  
        topicList.topic = items;
+       //topicList.article = items;
     }
 
     if (articleSection) {  // top 3 articles    
@@ -173,8 +180,8 @@ const Topics: NextFC<TopicsProps> = ({
     }
 
     if (articleList) { 
-        var { items } = await client.items().type('article').getPromise(); // get all articles     
-        articleList.article = await client.items().type('article').getPromise(); 
+        const { ...items } = await client.item('car').getPromise(); // get all articles     
+        articleList.article = items.linkedItems; 
     }
   
 

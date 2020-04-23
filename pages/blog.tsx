@@ -13,7 +13,6 @@ import { Layout } from '../components/layout/layout';
 import { PreLoader } from '../components/PreLoader';
 import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
 import { ArticleSection } from '../components/sections/article/ArticleSection';
-import { ArticleList } from '../components/sections/article/ArticleList';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
 import {
@@ -25,7 +24,9 @@ import { ContentItemElementContext } from '../components/context/ContentItemElem
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
 import { getBlogCodenameFromQuery } from '../utilities/utils';
-import { BlogSection } from '../components/sections/blog/BlogSection';
+import { BlogDetail} from '../components/sections/blog/BlogDetail'
+import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
+import { BlogList } from '../components/sections/blog/BlogList';
 
 
 type Content = {
@@ -48,8 +49,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_about_us': AboutUsSection,
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
-  'section_blog': ArticleSection,
-  'section_blog_list': BlogSection
+  'section_blog': BlogsBlogSection,
+  'section_blog_list': BlogDetail
 };
 
 const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
@@ -142,7 +143,6 @@ const Articles: NextFC<ArticlesProps> = ({
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
     });
     const { debug: forget1, ...content } = await client.item('blogs').withParameter('depth', '10').getPromise();
-    const { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise(); // get all blogs
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
         ...map,
@@ -155,14 +155,14 @@ const Articles: NextFC<ArticlesProps> = ({
     const blogCarousel = sections.find((section: ContentItem) => section.system.type === 'section_blog');
     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
 
-    console.log(sections);
-
-    if (blogCarousel) {      
-      blogCarousel.article = items;
+    if (blogList) {      
+      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise();
+        blogList.article = items; 
     }
 
-    if (blogList) {      
-        blogList.blogPosts = items; 
+    if (blogCarousel) {      
+      var { items } = await client.items().type('blog_post').getPromise();
+      blogCarousel.article = items;
     }
   
     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
