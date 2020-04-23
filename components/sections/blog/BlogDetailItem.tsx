@@ -1,0 +1,89 @@
+import { ContentItem } from 'kentico-cloud-delivery';
+import { NextFC } from 'next';
+import PropTypes, { ValidationMap } from 'prop-types';
+import React from 'react';
+import { stripPTags } from '../../../utilities/utils';
+import { getItemElementRenderer } from '../../ItemElementValue';
+
+
+export interface IArticleDetailItemStateProps {
+  readonly data: ContentItem;
+}
+
+export interface IArticleDetailItemDispatchProps {
+}
+
+interface IArticleDetailItemProps extends IArticleDetailItemStateProps, IArticleDetailItemDispatchProps {
+}
+
+const propTypes: ValidationMap<IArticleDetailItemProps> = {
+  data: PropTypes.any.isRequired,
+};
+
+
+
+const BlogTitle = getItemElementRenderer(
+  'title',
+  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
+    <h1>
+      {value}
+    </h1>
+  )),
+);
+
+const BlogLeadParagraph = getItemElementRenderer(
+  'lead_paragraph',
+  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+    <div
+      ref={ref}
+      className="lead"
+    >
+      {stripPTags(value)}
+    </div>
+  )),
+);
+
+const BlogContent = getItemElementRenderer(
+  'content',
+  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+    <div
+      ref={ref}
+      className="mb-0"
+    >
+      {stripPTags(value)}
+    </div>
+  )),
+);
+
+
+
+
+
+export const BlogDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
+  return (
+    <div
+      className="item"
+    >
+      <div className="article">
+        <div className="article-info">
+          <BlogTitle
+            data={data}
+          />
+          <BlogLeadParagraph
+            data={data}
+          />
+          <BlogContent
+            data={data}
+          />
+          
+        </div>
+      </div>
+      <br/>
+      <br/>
+    </div>
+    
+  );
+};
+
+BlogDetailItem.displayName = 'BlogDetailItem';
+BlogDetailItem.propTypes = propTypes;

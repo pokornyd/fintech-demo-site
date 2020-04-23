@@ -7,29 +7,26 @@ import {
   PreTitle,
   Title,
 } from '../../sectionIntroductionRenderers';
-import { TopicListItem } from './TopicListItem';
-import { ArticleList } from '../article/ArticleList';
-import { ArticleListItem } from '../article/ArticleListItem';
+import { BlogDetailItem } from './BlogDetailItem';
 
 
 
-export interface ITopicListStateProps {
+export interface IArticleDetailStateProps {
     readonly data: ContentItem;
   }
   
-  export interface ITopicListDispatchProps {
+  export interface IArticleDetailDispatchProps {
   }
   
-  interface ITopicListProps extends ITopicListStateProps, ITopicListDispatchProps {
+  interface IArticleDetailProps extends IArticleDetailStateProps, IArticleDetailDispatchProps {
   }
   
-  const propTypes: ValidationMap<ITopicListProps> = {
+  const propTypes: ValidationMap<IArticleDetailProps> = {
     data: PropTypes.any.isRequired,
   };
   
-  
-  export class TopicList extends React.PureComponent<ITopicListProps> {
-    static displayName = 'TopicList';
+  export class BlogDetail extends React.PureComponent<IArticleDetailProps> {
+    static displayName = 'BlogDetail';
     static propTypes = propTypes;
   
     private readonly carouselRef = React.createRef<HTMLDivElement>();
@@ -43,20 +40,12 @@ export interface ITopicListStateProps {
     render() {
       const { data } = this.props;
       return (
-        <section className="topic-list" >
+        <section className="article-Detail" >
           <div className="container">
             <div className="row">
               <div className="mx-auto">
                 <div className="title text-center">
-                  <PreTitle
-                    data={data}
-                  />
-                  <Title
-                    data={data}
-                  />
-                  <Description
-                    data={data}
-                  />
+
 
                 </div>
               </div>
@@ -64,13 +53,14 @@ export interface ITopicListStateProps {
             <div className="row">
               <div className="col-md-12">
 
-                  {data.topic.map((topic: ContentItem) => (
-                    <TopicListItem
-                      key={topic.system.id}
-                      data={topic}
+                  {data.article.map((article: ContentItem) => (
+                    <BlogDetailItem
+                      key={article.system.id}
+                      data={article}
                     />
-                  ))}                 
+                  ))}
                 </div>
+              
             </div>
           </div>
           

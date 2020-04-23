@@ -7,29 +7,24 @@ import {
   PreTitle,
   Title,
 } from '../../sectionIntroductionRenderers';
-import { TopicListItem } from './TopicListItem';
-import { ArticleList } from '../article/ArticleList';
-import { ArticleListItem } from '../article/ArticleListItem';
+import { BlogListItem } from './BlogListItem';
 
-
-
-export interface ITopicListStateProps {
+export interface IArticleListStateProps {
     readonly data: ContentItem;
   }
   
-  export interface ITopicListDispatchProps {
+  export interface IArticleListDispatchProps {
   }
   
-  interface ITopicListProps extends ITopicListStateProps, ITopicListDispatchProps {
+  interface IArticleListProps extends IArticleListStateProps, IArticleListDispatchProps {
   }
   
-  const propTypes: ValidationMap<ITopicListProps> = {
+  const propTypes: ValidationMap<IArticleListProps> = {
     data: PropTypes.any.isRequired,
   };
   
-  
-  export class TopicList extends React.PureComponent<ITopicListProps> {
-    static displayName = 'TopicList';
+  export class BlogList extends React.PureComponent<IArticleListProps> {
+    static displayName = 'BlogList';
     static propTypes = propTypes;
   
     private readonly carouselRef = React.createRef<HTMLDivElement>();
@@ -43,7 +38,7 @@ export interface ITopicListStateProps {
     render() {
       const { data } = this.props;
       return (
-        <section className="topic-list" >
+        <section className="article-list" >
           <div className="container">
             <div className="row">
               <div className="mx-auto">
@@ -64,13 +59,14 @@ export interface ITopicListStateProps {
             <div className="row">
               <div className="col-md-12">
 
-                  {data.topic.map((topic: ContentItem) => (
-                    <TopicListItem
-                      key={topic.system.id}
-                      data={topic}
+                  {data.article.map((article: ContentItem) => (
+                    <BlogListItem
+                      key={article.system.id}
+                      data={article}
                     />
-                  ))}                 
+                  ))}
                 </div>
+              
             </div>
           </div>
           
