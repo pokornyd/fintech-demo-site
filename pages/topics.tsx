@@ -48,7 +48,7 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
   'section_articles': ArticleSection,
-//   'section_article_list': ArticleList,
+  'section_article_list': ArticleList,
   'section_topic_list': TopicList
 };
 
