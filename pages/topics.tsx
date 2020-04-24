@@ -117,8 +117,6 @@ const Topics: NextFC<TopicsProps> = ({
                   <Component
                     key={section.system.id}
                     data={section}
-                    dataArticles={section}
-                    dataBlogs={section}
                   />
                 );
               })
