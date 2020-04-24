@@ -2,30 +2,25 @@ import { ContentItem } from 'kentico-cloud-delivery';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { runCarousel } from '../../../utilities/carousel';
-import {
-  Description,
-  PreTitle,
-  Title,
-} from '../../sectionIntroductionRenderers';
 import { BlogDetailItem } from './BlogDetailItem';
 
 
 
-export interface IArticleDetailStateProps {
+export interface IBlogDetailStateProps {
     readonly data: ContentItem;
   }
   
-  export interface IArticleDetailDispatchProps {
+  export interface IBlogDetailDispatchProps {
   }
   
-  interface IArticleDetailProps extends IArticleDetailStateProps, IArticleDetailDispatchProps {
+  interface IBlogDetailProps extends IBlogDetailStateProps, IBlogDetailDispatchProps {
   }
   
-  const propTypes: ValidationMap<IArticleDetailProps> = {
+  const propTypes: ValidationMap<IBlogDetailProps> = {
     data: PropTypes.any.isRequired,
   };
   
-  export class BlogDetail extends React.PureComponent<IArticleDetailProps> {
+  export class BlogDetail extends React.PureComponent<IBlogDetailProps> {
     static displayName = 'BlogDetail';
     static propTypes = propTypes;
   
@@ -43,27 +38,16 @@ export interface IArticleDetailStateProps {
         <section className="article-Detail" >
           <div className="container">
             <div className="row">
-              <div className="mx-auto">
-                <div className="title text-center">
-
-
-                </div>
-              </div>
-            </div>
-            <div className="row">
               <div className="col-md-12">
-
                   {data.article.map((article: ContentItem) => (
                     <BlogDetailItem
                       key={article.system.id}
                       data={article}
                     />
                   ))}
-                </div>
-              
+                </div>             
             </div>
-          </div>
-          
+          </div>         
         </section>
       );
     }

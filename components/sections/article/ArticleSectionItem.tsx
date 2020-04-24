@@ -58,9 +58,7 @@ const ArticleReadMore = getItemElementRenderer(
 
 export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) => {
   return (
-    <div
-      className="item"
-    >
+    <div className="item">
       <div className="article">
         <div className="article-info">
           <ArticleTitle

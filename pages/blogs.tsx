@@ -12,7 +12,6 @@ import { NavBar } from '../components/navbar/NavBar';
 import { Layout } from '../components/layout/layout';
 import { PreLoader } from '../components/PreLoader';
 import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
-import { ArticleSection } from '../components/sections/article/ArticleSection';
 import { BlogList } from '../components/sections/blog/BlogList';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
@@ -149,12 +148,11 @@ const Articles: NextFC<ArticlesProps> = ({
       };
     }, {} as ItemMap);
   
-    const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
+    var sections: Array<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
   
     const blogCarousel = sections.find((section: ContentItem) => section.system.type === 'section_blog');
     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
 
-    console.log(sections);
 
     if (blogCarousel) {      
       blogCarousel.article = items;

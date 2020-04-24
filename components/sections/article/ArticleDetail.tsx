@@ -2,11 +2,6 @@ import { ContentItem } from 'kentico-cloud-delivery';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { runCarousel } from '../../../utilities/carousel';
-import {
-  Description,
-  PreTitle,
-  Title,
-} from '../../sectionIntroductionRenderers';
 import { ArticleDetailItem } from './ArticleDetailItem';
 
 
@@ -43,35 +38,16 @@ export interface IArticleDetailStateProps {
         <section className="article-Detail" >
           <div className="container">
             <div className="row">
-              <div className="mx-auto">
-                <div className="title text-center">
-                  <PreTitle
-                    data={data}
-                  />
-                  <Title
-                    data={data}
-                  />
-                  <Description
-                    data={data}
-                  />
-
-                </div>
-              </div>
-            </div>
-            <div className="row">
               <div className="col-md-12">
-
                   {data.article.map((article: ContentItem) => (
                     <ArticleDetailItem
                       key={article.system.id}
                       data={article}
                     />
                   ))}
-                </div>
-              
+                </div>             
             </div>
-          </div>
-          
+          </div>         
         </section>
       );
     }

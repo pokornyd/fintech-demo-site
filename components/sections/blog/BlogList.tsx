@@ -9,21 +9,21 @@ import {
 } from '../../sectionIntroductionRenderers';
 import { BlogListItem } from './BlogListItem';
 
-export interface IArticleListStateProps {
+export interface IBlogListStateProps {
     readonly data: ContentItem;
   }
   
-  export interface IArticleListDispatchProps {
+  export interface IBlogListDispatchProps {
   }
   
-  interface IArticleListProps extends IArticleListStateProps, IArticleListDispatchProps {
+  interface IBlogListProps extends IBlogListStateProps, IBlogListDispatchProps {
   }
   
-  const propTypes: ValidationMap<IArticleListProps> = {
+  const propTypes: ValidationMap<IBlogListProps> = {
     data: PropTypes.any.isRequired,
   };
   
-  export class BlogList extends React.PureComponent<IArticleListProps> {
+  export class BlogList extends React.PureComponent<IBlogListProps> {
     static displayName = 'BlogList';
     static propTypes = propTypes;
   
@@ -65,11 +65,9 @@ export interface IArticleListStateProps {
                       data={article}
                     />
                   ))}
-                </div>
-              
+                </div>             
             </div>
-          </div>
-          
+          </div>         
         </section>
       );
     }

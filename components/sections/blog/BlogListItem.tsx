@@ -6,23 +6,23 @@ import { stripPTags } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
 
 
-export interface IArticleListItemStateProps {
+export interface IBlogListItemStateProps {
   readonly data: ContentItem;
 }
 
-export interface IArticleListItemDispatchProps {
+export interface IBlogListItemDispatchProps {
 }
 
-interface IArticleListItemProps extends IArticleListItemStateProps, IArticleListItemDispatchProps {
+interface IBlogListItemProps extends IBlogListItemStateProps, IBlogListItemDispatchProps {
 }
 
-const propTypes: ValidationMap<IArticleListItemProps> = {
+const propTypes: ValidationMap<IBlogListItemProps> = {
   data: PropTypes.any.isRequired,
 };
 
 
 
-const ArticleTitle = getItemElementRenderer(
+const BlogTitle = getItemElementRenderer(
   'title',
   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
     <h3>
@@ -31,7 +31,7 @@ const ArticleTitle = getItemElementRenderer(
   )),
 );
 
-const ArticleContent = getItemElementRenderer(
+const BlogContent = getItemElementRenderer(
   'content',
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <p
@@ -43,7 +43,7 @@ const ArticleContent = getItemElementRenderer(
   )),
 );
 
-const ArticleReadMore = getItemElementRenderer(
+const BlogReadMore = getItemElementRenderer(
 'system.codename',
   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
     <a
@@ -56,20 +56,20 @@ const ArticleReadMore = getItemElementRenderer(
   )),
 );
 
-export const BlogListItem: NextFC<IArticleListItemProps> = ({ data }) => {
+export const BlogListItem: NextFC<IBlogListItemProps> = ({ data }) => {
   return (
     <div
       className="item"
     >
       <div className="article">
         <div className="article-info">
-          <ArticleTitle
+          <BlogTitle
             data={data}
           />
-          <ArticleContent
+          <BlogContent
             data={data}
           />
-          <ArticleReadMore
+          <BlogReadMore
             data={data}
           />
         </div>

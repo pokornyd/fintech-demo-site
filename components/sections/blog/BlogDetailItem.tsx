@@ -6,17 +6,17 @@ import { stripPTags } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
 
 
-export interface IArticleDetailItemStateProps {
+export interface IBlogDetailItemStateProps {
   readonly data: ContentItem;
 }
 
-export interface IArticleDetailItemDispatchProps {
+export interface IBlogDetailItemDispatchProps {
 }
 
-interface IArticleDetailItemProps extends IArticleDetailItemStateProps, IArticleDetailItemDispatchProps {
+interface IBlogDetailItemProps extends IBlogDetailItemStateProps, IBlogDetailItemDispatchProps {
 }
 
-const propTypes: ValidationMap<IArticleDetailItemProps> = {
+const propTypes: ValidationMap<IBlogDetailItemProps> = {
   data: PropTypes.any.isRequired,
 };
 
@@ -59,11 +59,9 @@ const BlogContent = getItemElementRenderer(
 
 
 
-export const BlogDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
+export const BlogDetailItem: NextFC<IBlogDetailItemProps> = ({ data }) => {
   return (
-    <div
-      className="item"
-    >
+    <div className="item">
       <div className="article">
         <div className="article-info">
           <BlogTitle
@@ -74,14 +72,12 @@ export const BlogDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
           />
           <BlogContent
             data={data}
-          />
-          
+          />         
         </div>
       </div>
       <br/>
       <br/>
-    </div>
-    
+    </div>   
   );
 };
 

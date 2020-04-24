@@ -13,7 +13,6 @@ import { Layout } from '../components/layout/layout';
 import { PreLoader } from '../components/PreLoader';
 import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
 import { ArticleSection } from '../components/sections/article/ArticleSection';
-//import { ArticleList } from '../components/sections/article/ArticleList';
 import { ArticleDetail } from '../components/sections/article/ArticleDetail';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
@@ -50,8 +49,7 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
   'section_articles': ArticleSection,
-  //'section_article_list': ArticleList,
-  'section_article_detail': ArticleDetail
+  'section_article_list': ArticleDetail
 };
 
 const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
@@ -143,11 +141,11 @@ const Articles: NextFC<ArticlesProps> = ({
       enablePreviewMode: isPreview,
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
     });
-    const { debug: forget1, ...content } = await client.item('article_detail').withParameter('depth', '10').getPromise();
+    const { debug: forget1, ...content } = await client.item('articles').withParameter('depth', '10').getPromise();
 
     const codename = getCodenameFromQuery(query);
     
-    const { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise(); 
+    var { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise(); 
     
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
@@ -158,18 +156,19 @@ const Articles: NextFC<ArticlesProps> = ({
   
     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
   
-    //const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
-    //const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
-    const articleDetail = sections.find((section: ContentItem) => section.system.type === 'section_article_detail');
-
-    //console.log(articleList);
-
-    /*if (articleSection) {      
-      articleSection.article = items;
-    }*/
+    const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
+    const articleDetail = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
+    const index = sections.findIndex((section: ContentItem) => section.system.type === 'section_hero_unit');
 
     if (articleDetail) {      
-        articleDetail.article = items; //await client.items().type('article').containsFilter('codename',['not_only_your_insurance_partner']).getPromise(); 
+        articleDetail.article = items;
+        sections[index].title.value = items[0].elements.title.value;
+        sections[index].description.value = "";
+    }
+
+    if (articleSection) {
+      var { items } = await client.items().type('article').getPromise(); 
+      articleSection.article = items;
     }
   
     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();

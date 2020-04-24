@@ -49,9 +49,7 @@ const ArticleContent = getItemElementRenderer(
 
 export const ArticleDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
   return (
-    <div
-      className="item"
-    >
+    <div className="item">
       <div className="article">
         <div className="article-info">
           <ArticleTitle
@@ -59,14 +57,12 @@ export const ArticleDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => 
           />
           <ArticleContent
             data={data}
-          />
-          
+          />         
         </div>
       </div>
       <br/>
       <br/>
-    </div>
-    
+    </div>   
   );
 };
 

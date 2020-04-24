@@ -9,8 +9,6 @@ import {
 } from '../../sectionIntroductionRenderers';
 import { ArticleListItem } from './ArticleListItem';
 
-
-
 export interface IArticleListStateProps {
     readonly data: ContentItem;
   }
@@ -54,24 +52,20 @@ export interface IArticleListStateProps {
                   <Description
                     data={data}
                   />
-
                 </div>
               </div>
             </div>
             <div className="row">
               <div className="col-md-12">
-
                   {data.article.map((article: ContentItem) => (
                     <ArticleListItem
                       key={article.system.id}
                       data={article}
                     />
                   ))}
-                </div>
-              
+                </div>             
             </div>
-          </div>
-          
+          </div>         
         </section>
       );
     }

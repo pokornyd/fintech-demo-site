@@ -153,8 +153,6 @@ const Articles: NextFC<ArticlesProps> = ({
     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
 
-    console.log(sections);
-
     if (articleSection) {  // top 3 articles    
       articleSection.article = items;
     }

@@ -12,7 +12,6 @@ import { NavBar } from '../components/navbar/NavBar';
 import { Layout } from '../components/layout/layout';
 import { PreLoader } from '../components/PreLoader';
 import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
-import { ArticleSection } from '../components/sections/article/ArticleSection';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
 import {
@@ -26,7 +25,6 @@ import { getProjectIdFromQuery } from '../utilities/utils';
 import { getCodenameFromQuery } from '../utilities/utils';
 import { BlogDetail} from '../components/sections/blog/BlogDetail'
 import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
-import { BlogList } from '../components/sections/blog/BlogList';
 
 
 type Content = {
@@ -150,14 +148,17 @@ const Articles: NextFC<ArticlesProps> = ({
       };
     }, {} as ItemMap);
   
-    const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
+    var sections: Array<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
   
     const blogCarousel = sections.find((section: ContentItem) => section.system.type === 'section_blog');
     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
+    const index = sections.findIndex((section: ContentItem) => section.system.type === 'section_hero_unit');
 
     if (blogList) {      
-      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getCodenameFromQuery(query)).getPromise();
-        blogList.article = items; 
+      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getCodenameFromQuery(query)).getPromise();    
+      sections[index].title.value = items[0].elements.title.value;
+      sections[index].description.value = "";
+      blogList.article = items; 
     }
 
     if (blogCarousel) {      

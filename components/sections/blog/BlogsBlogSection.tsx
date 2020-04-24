@@ -10,21 +10,21 @@ import {
 import { BlogsBlogSectionItem } from './BlogsBlogSectionItem';
 
 
-export interface IArticleSectionStateProps {
+export interface IBlogsBlogSectionStateProps {
   readonly data: ContentItem;
 }
 
-export interface IArticleSectionDispatchProps {
+export interface IBlogsBlogSectionDispatchProps {
 }
 
-interface IArticleSectionProps extends IArticleSectionStateProps, IArticleSectionDispatchProps {
+interface IBlogsBlogSectionProps extends IBlogsBlogSectionStateProps, IBlogsBlogSectionDispatchProps {
 }
 
-const propTypes: ValidationMap<IArticleSectionProps> = {
+const propTypes: ValidationMap<IBlogsBlogSectionProps> = {
   data: PropTypes.any.isRequired,
 };
 
-export class BlogsBlogSection extends React.PureComponent<IArticleSectionProps> {
+export class BlogsBlogSection extends React.PureComponent<IBlogsBlogSectionProps> {
   static displayName = 'BlogsBlogSection';
   static propTypes = propTypes;
 
