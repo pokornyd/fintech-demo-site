@@ -146,8 +146,6 @@ const Topics: NextFC<TopicsProps> = ({
     const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
     const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
-    //const { debug: forget4, ...nestedContent } = await client.items().inFilter("system.type", ["article", "blog"]).getPromise();
-
     
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
@@ -156,15 +154,8 @@ const Topics: NextFC<TopicsProps> = ({
       };
     }, {} as ItemMap);
 
-    // const nestedLinkedItemsByCodename = nestedContent.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
-    //   return {
-    //     ...map,
-    //     [contentItem.system.codename]: contentItem,
-    //   };
-    // }, {} as ItemMap);
   
     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
-    //const nestedSections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => nestedLinkedItemsByCodename[codename]);
 
     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
@@ -173,10 +164,6 @@ const Topics: NextFC<TopicsProps> = ({
     if (topicList) {  
         var { items } = await client.items().type('topic').getPromise(); // get all topics  
        topicList.topic = items;
-       var { items } = await client.items().type('article').getPromise(); // get all articles
-       topicList.article = items;
-       var { items } = await client.items().type('blog_post').getPromise(); // get all blogs
-       topicList.blog = items;
     }
 
     if (articleSection) {  // top 3 articles    
@@ -185,12 +172,11 @@ const Topics: NextFC<TopicsProps> = ({
     }
 
     if (articleList) { 
-        const { ...items } = await client.item('car').getPromise(); // get all articles     
-        articleList.article = items.linkedItems; 
+        var { items } = await client.items().type('blog_post').getPromise(); // get all blogs     
+        articleList.article = items; 
     }
   
 
-   
   
     return {
       brandDetails,

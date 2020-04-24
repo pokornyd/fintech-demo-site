@@ -11,8 +11,6 @@ import { BlogListItem} from '../blog/BlogListItem';
 
 export interface ITopicListItemStateProps {
   readonly data: ContentItem;
-  readonly dataArticles: ContentItem;
-  readonly dataBlogs: ContentItem;
 }
 
 export interface ITopicListItemDispatchProps {
@@ -22,9 +20,7 @@ interface ITopicListItemProps extends ITopicListItemStateProps, ITopicListItemDi
 }
 
 const propTypes: ValidationMap<ITopicListItemProps> = {
-  data: PropTypes.any.isRequired,
-  dataArticles: PropTypes.any.isRequired,
-  dataBlogs: PropTypes.any.isRequired,
+  data: PropTypes.any.isRequired
 };
 
 const TopicTitle = getItemElementRenderer(
@@ -41,17 +37,8 @@ const TopicTitle = getItemElementRenderer(
   )),
 );
 
-// const RelatedPosts = getItemElementRenderer(
-//   'related_posts',
-//   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({value}, ref) =>(
-//     <h4>
-//       {value}
-//     </h4>
-//   )),
-// );
 
-
-export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, dataArticles, dataBlogs }) => {
+export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
   return (
     <div
       className="item"
@@ -62,19 +49,22 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, dataArticles,
           <TopicTitle
             data={data}
           /> 
-         
-          {dataArticles.article.map((article: ContentItem) => ( //if contentItem is linked display, otherwise skip
+          {data.related_posts.filter((article: ContentItem) => article.system.type == 'article').map((article: ContentItem) => ( 
+                    
                     <ArticleListItem
                       key={article.system.id}
                       data={article}
                     />
-                  ))}
-          {dataBlogs.blog.map((blog: ContentItem) => (
+           ))}
+
+          {data.related_posts.filter((blog: ContentItem) => blog.system.type == 'blog_post').map((blog: ContentItem) => ( 
+                    
                     <BlogListItem
                       key={blog.system.id}
                       data={blog}
                     />
-                  ))}
+           ))}
+         
 
         </div>
       </div>
