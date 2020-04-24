@@ -8,13 +8,14 @@ import {
   Title,
 } from '../../sectionIntroductionRenderers';
 import { TopicListItem } from './TopicListItem';
-import { ArticleList } from '../article/ArticleList';
-import { ArticleListItem } from '../article/ArticleListItem';
+
 
 
 
 export interface ITopicListStateProps {
     readonly data: ContentItem;
+    readonly dataArticles: ContentItem;
+    readonly dataBlogs: ContentItem;
   }
   
   export interface ITopicListDispatchProps {
@@ -25,6 +26,8 @@ export interface ITopicListStateProps {
   
   const propTypes: ValidationMap<ITopicListProps> = {
     data: PropTypes.any.isRequired,
+    dataArticles: PropTypes.any.isRequired,
+    dataBlogs: PropTypes.any.isRequired,
   };
   
   
@@ -42,6 +45,8 @@ export interface ITopicListStateProps {
   
     render() {
       const { data } = this.props;
+      const { dataArticles } = this.props;
+      const { dataBlogs} = this.props;
       return (
         <section className="topic-list" >
           <div className="container">
@@ -68,6 +73,8 @@ export interface ITopicListStateProps {
                     <TopicListItem
                       key={topic.system.id}
                       data={topic}
+                      dataArticles={dataArticles}
+                      dataBlogs={dataBlogs}
                     />
                   ))}                 
                 </div>

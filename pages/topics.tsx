@@ -117,6 +117,8 @@ const Topics: NextFC<TopicsProps> = ({
                   <Component
                     key={section.system.id}
                     data={section}
+                    dataArticles={section}
+                    dataBlogs={section}
                   />
                 );
               })
@@ -171,7 +173,10 @@ const Topics: NextFC<TopicsProps> = ({
     if (topicList) {  
         var { items } = await client.items().type('topic').getPromise(); // get all topics  
        topicList.topic = items;
-       //topicList.article = items;
+       var { items } = await client.items().type('article').getPromise(); // get all articles
+       topicList.article = items;
+       var { items } = await client.items().type('blog_post').getPromise(); // get all blogs
+       topicList.blog = items;
     }
 
     if (articleSection) {  // top 3 articles    
