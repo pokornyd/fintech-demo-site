@@ -6,12 +6,8 @@ export const getProjectIdFromQuery = (query: Record<string, string | string[] | 
   return (query.projectId || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
 };
 
-export const getBlogCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
-  return (query.name) as string;
-};
-
 export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
-  return (query.codename) as string;
+  return (query.name) as string;
 };
 
 

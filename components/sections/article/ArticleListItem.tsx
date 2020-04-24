@@ -49,7 +49,7 @@ const ArticleReadMore = getItemElementRenderer(
     <a
       ref={ref}
       className="mb-0"
-      href={'/article?codename='+ value}
+      href={'/article?name='+ value}
     >
       READ MORE
     </a>

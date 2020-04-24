@@ -23,7 +23,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
 import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
-import { getBlogCodenameFromQuery } from '../utilities/utils';
+import { getCodenameFromQuery } from '../utilities/utils';
 import { BlogDetail} from '../components/sections/blog/BlogDetail'
 import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
 import { BlogList } from '../components/sections/blog/BlogList';
@@ -156,7 +156,7 @@ const Articles: NextFC<ArticlesProps> = ({
     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
 
     if (blogList) {      
-      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise();
+      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getCodenameFromQuery(query)).getPromise();
         blogList.article = items; 
     }
 
