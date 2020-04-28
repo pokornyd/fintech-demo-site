@@ -5,7 +5,7 @@ import React from 'react';
 import { printFuzzyDate } from '../../../utilities/timeUtils';
 import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
-import { IElementStringValueWithQuery, IElementStringValue } from '../auxiliarytypes';
+import { IElementStringValueWithQuery, IElementStringValue, IElementStringValueWithQueryAndData } from '../auxiliarytypes';
 
 
 export interface IBlogCarouselItemStateProps {
@@ -67,11 +67,11 @@ const PostPublishDate = getItemElementRenderer(
 
 const PostTitle = getItemElementRenderer(
   'title',
-  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQueryAndData>(({ value, query, data }, ref) => (
     <a
       ref={ref}
       className="post-title"
-      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + data.system.codename}
     >
       {value}
     </a>

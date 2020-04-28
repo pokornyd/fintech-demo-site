@@ -4,6 +4,7 @@ import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { stripPTags } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
+import { IElementStringValue } from '../auxiliarytypes';
 
 
 export interface IBlogDetailItemStateProps {
@@ -36,7 +37,7 @@ const BlogLeadParagraph = getItemElementRenderer(
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <div
       ref={ref}
-      className="lead"
+      className="lead pt-4"
     >
       {stripPTags(value)}
     </div>
@@ -48,7 +49,7 @@ const BlogContent = getItemElementRenderer(
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <div
       ref={ref}
-      className="mb-0"
+      className="mb-0 pt-4"
     >
       {stripPTags(value)}
     </div>
