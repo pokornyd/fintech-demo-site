@@ -33,6 +33,7 @@ type Content = {
 };
 
 type IndexProps = {
+  readonly queryObj: Record<string, string | string[] | undefined>;
   readonly content: Content;
   readonly navigation: Content;
   readonly brandDetails: Content;
@@ -66,6 +67,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
 type ItemMap = { readonly [codename: string]: ContentItem };
 
 const Index: NextFC<IndexProps> = ({
+  queryObj,
   brandDetails,
   content,
   isPreview,
@@ -74,7 +76,6 @@ const Index: NextFC<IndexProps> = ({
   removeScrollbar,
   sections,
 }) => {
-
   return (
     <PreviewContext.Provider
       value={{
@@ -99,6 +100,7 @@ html,body{
         <PreLoader />
 
         <NavBar
+          query={queryObj}
           navigation={navigation.item}
           brandDetails={brandDetails.item}
         />
@@ -115,6 +117,7 @@ html,body{
               const Component = getRenderComponentForSection(section.system.type);
               return (
                 <Component
+                  query={queryObj}
                   key={section.system.id}
                   data={section}
                 />
@@ -132,6 +135,7 @@ html,body{
 };
 
 Index.getInitialProps = async ({ query, req }) => {
+  const queryObj = query;
   const hostname = req ? req.headers.host : location.hostname;
   const isPreview = Object.hasOwnProperty.call(query, 'preview');
   const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
@@ -168,6 +172,7 @@ Index.getInitialProps = async ({ query, req }) => {
     projectId,
     removeScrollbar,
     sections,
+    queryObj,
   };
 };
 

@@ -12,6 +12,7 @@ import { BlogCarouselItem } from './BlogCarouselItem';
 
 export interface IBlogSectionStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IBlogSectionDispatchProps {
@@ -37,7 +38,7 @@ export class BlogSection extends React.PureComponent<IBlogSectionProps> {
   }
 
   render() {
-    const { data } = this.props;
+    const { data, query } = this.props;
     return (
       <section className="blog">
         <div className="container">
@@ -72,6 +73,7 @@ export class BlogSection extends React.PureComponent<IBlogSectionProps> {
                   <BlogCarouselItem
                     key={blogPost.system.id}
                     data={blogPost}
+                    query={query}
                   />
                 ))}
               </div>

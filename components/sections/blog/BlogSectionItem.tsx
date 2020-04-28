@@ -4,10 +4,12 @@ import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { stripPTags } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
+import { IElementStringValue } from '../auxiliarytypes';
 
 
 export interface IBlogSectionItemStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IBlogSectionItemDispatchProps {

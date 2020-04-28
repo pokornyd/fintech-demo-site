@@ -3,13 +3,20 @@ export const stripPTags = (html: string) => {
 };
 
 export const getProjectIdFromQuery = (query: Record<string, string | string[] | undefined>): string => {
-  return (query.projectId || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
+  return (query.projectid || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
 };
 
 export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
   return (query.name) as string;
 };
 
+export const addPersistentProjId = (query: Record<string, string | string[] | undefined>): string => {
+  return query && query.projectid ? "?projectid=" + query.projectid : "";
+};
+
+export const addDetailQueryString = (query: Record<string, string | string[] | undefined>): string => {
+  return query && query.projectid ? "&name=" : "?name=";
+};
 
 export const addClassToPTags = (html: string, className: string) => {
   const replacement = `<p class="${className}">`;

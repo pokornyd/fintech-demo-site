@@ -12,6 +12,7 @@ import { ArticleSectionItem } from './ArticleSectionItem';
 
 export interface IArticleSectionStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IArticleSectionDispatchProps {
@@ -37,7 +38,7 @@ export class ArticleSection extends React.PureComponent<IArticleSectionProps> {
   }
 
   render() {
-    const { data } = this.props;
+    const { data, query } = this.props;
     return (
       <section className="article">
         <div className="container">
@@ -70,6 +71,7 @@ export class ArticleSection extends React.PureComponent<IArticleSectionProps> {
               >
                 {data.article.map((article: ContentItem) => (
                   <ArticleSectionItem
+                    query={query}
                     key={article.system.id}
                     data={article}
                   />

@@ -1,14 +1,16 @@
 import classNames from 'classnames';
 import { ContentItem } from 'kentico-cloud-delivery';
-import { NextFC } from 'next';
+import { NextFC, NextContext } from 'next';
 import Link from 'next/link';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { getItemElementRenderer } from '../../ItemElementValue';
-
+import { addPersistentProjId } from '../../../utilities/utils';
+import { IElementStringValue } from '../../sections/auxiliarytypes';
 
 export interface INavigationMenuStateProps {
   readonly navigation: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface INavigationMenuDispatchProps {
@@ -47,7 +49,7 @@ const NavMenuLink = getItemElementRenderer(
   )),
 );
 
-export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation }) => {
+export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation, query }) => {
   return (
     <>
       <button
@@ -71,7 +73,7 @@ export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation }) => 
               key={navigationItem.system.id}
               data={navigationItem}
               subItems={navigationItem.sub_items}
-              url={navigationItem.url.value}
+              url={navigationItem.url.value + addPersistentProjId(query)}              
             />
           ))}
         </ul>

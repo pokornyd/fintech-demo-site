@@ -2,12 +2,14 @@ import { ContentItem } from 'kentico-cloud-delivery';
 import { NextFC } from 'next';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
-import { stripPTags } from '../../../utilities/utils';
+import { stripPTags, addDetailQueryString, addPersistentProjId } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
+import { IElementStringValue, IElementStringValueWithQuery } from '../auxiliarytypes';
 
 
 export interface IArticleListItemStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IArticleListItemDispatchProps {
@@ -45,18 +47,18 @@ const ArticleContent = getItemElementRenderer(
 
 const ArticleReadMore = getItemElementRenderer(
 'system.codename',
-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
     <a
       ref={ref}
       className="mb-0"
-      href={'/article?name='+ value}
+      href={'/article'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
     >
       READ MORE
     </a>
   )),
 );
 
-export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
+export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data, query }) => {
   return (
     <div className="item">
       <div className="article">
@@ -69,6 +71,7 @@ export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
           />
           <ArticleReadMore
             data={data}
+            query={query}
           />
         </div>
       </div>

@@ -11,6 +11,7 @@ import { BlogListItem } from './BlogListItem';
 
 export interface IBlogListStateProps {
     readonly data: ContentItem;
+    readonly query: Record<string, string | string[] | undefined>;
   }
   
   export interface IBlogListDispatchProps {
@@ -36,7 +37,7 @@ export interface IBlogListStateProps {
     }
   
     render() {
-      const { data } = this.props;
+      const { data, query } = this.props;
       return (
         <section className="article-list" >
           <div className="container">
@@ -61,6 +62,7 @@ export interface IBlogListStateProps {
 
                   {data.article.map((article: ContentItem) => (
                     <BlogListItem
+                      query={query}
                       key={article.system.id}
                       data={article}
                     />

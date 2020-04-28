@@ -9,11 +9,13 @@ import {
 } from '../Search';
 import { NavBarLogo } from '../SVGs/NavBarLogo';
 import { NavigationMenu } from './navigationMenu/NavigationMenu';
+import { IAssetElementValue } from '../sections/auxiliarytypes';
 
 
 export interface INavBarStateProps {
   readonly brandDetails: ContentItem;
   readonly navigation: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface INavBarDispatchProps {
@@ -70,10 +72,9 @@ export class NavBar extends React.PureComponent<INavBarProps, INavBarState> {
       isSticky: scTop > 400,
     }));
   };
-
+  
   render() {
-    const { navigation, brandDetails } = this.props;
-
+    const { navigation, brandDetails, query } = this.props;
     return (
       <header
         className={classNames('navbar-sticky navbar-transparent navbar-primary', {
@@ -88,6 +89,7 @@ export class NavBar extends React.PureComponent<INavBarProps, INavBarState> {
               data={brandDetails}
             />
             <NavigationMenu
+              query={query}
               navigation={navigation}
             />
             <div className="navbar-nav">

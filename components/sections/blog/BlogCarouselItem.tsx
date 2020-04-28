@@ -3,12 +3,14 @@ import { NextFC } from 'next';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
 import { printFuzzyDate } from '../../../utilities/timeUtils';
-import { stripPTags } from '../../../utilities/utils';
+import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
+import { IElementStringValueWithQuery, IElementStringValue } from '../auxiliarytypes';
 
 
 export interface IBlogCarouselItemStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IBlogCarouselItemDispatchProps {
@@ -65,11 +67,11 @@ const PostPublishDate = getItemElementRenderer(
 
 const PostTitle = getItemElementRenderer(
   'title',
-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
     <a
       ref={ref}
       className="post-title"
-      href="#!"
+      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
     >
       {value}
     </a>
@@ -88,7 +90,7 @@ const PostLeadParagraph = getItemElementRenderer(
   )),
 );
 
-export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data }) => {
+export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data, query }) => {
   const { author: { 0: author } } = data;
   return (
     <div
@@ -109,6 +111,7 @@ export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data }) => {
             data={data}
           />
           <PostTitle
+            query={query}
             data={data}
           />
           <PostLeadParagraph

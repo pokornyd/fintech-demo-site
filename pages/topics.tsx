@@ -33,6 +33,7 @@ type Content = {
 };
 
 type TopicsProps = {
+  readonly queryObj: Record<string, string | string[] | undefined>;
   readonly content: Content;
   readonly navigation: Content;
   readonly brandDetails: Content;
@@ -66,6 +67,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
 type ItemMap = { readonly [codename: string]: ContentItem };
 
 const Topics: NextFC<TopicsProps> = ({
+    queryObj,
     brandDetails,
     content,
     isPreview,
@@ -99,6 +101,7 @@ const Topics: NextFC<TopicsProps> = ({
           <PreLoader />
   
           <NavBar
+            query={queryObj}
             navigation={navigation.item}
             brandDetails={brandDetails.item}
           />
@@ -115,6 +118,7 @@ const Topics: NextFC<TopicsProps> = ({
                 const Component = getRenderComponentForSection(section.system.type);
                 return (
                   <Component
+                    query={queryObj}
                     key={section.system.id}
                     data={section}
                   />
@@ -132,6 +136,7 @@ const Topics: NextFC<TopicsProps> = ({
   };
   
   Topics.getInitialProps = async ({ query, req }) => {
+    const queryObj = query;
     const hostname = req ? req.headers.host : location.hostname;
     const isPreview = Object.hasOwnProperty.call(query, 'preview');
     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
@@ -177,6 +182,7 @@ const Topics: NextFC<TopicsProps> = ({
 
   
     return {
+      queryObj,
       brandDetails,
       content: content as Content,
       isPreview,

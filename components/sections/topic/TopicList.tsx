@@ -14,6 +14,7 @@ import { TopicListItem } from './TopicListItem';
 
 export interface ITopicListStateProps {
     readonly data: ContentItem;
+    readonly query: Record<string, string | string[] | undefined>;
   }
   
   export interface ITopicListDispatchProps {
@@ -40,7 +41,7 @@ export interface ITopicListStateProps {
     }
   
     render() {
-      const { data } = this.props;
+      const { data, query } = this.props;
       return (
         <section className="topic-list" >
           <div className="container">
@@ -65,6 +66,7 @@ export interface ITopicListStateProps {
 
                   {data.topic.map((topic: ContentItem) => (
                     <TopicListItem
+                      query={query}
                       key={topic.system.id}
                       data={topic}
                     />

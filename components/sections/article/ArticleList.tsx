@@ -11,6 +11,7 @@ import { ArticleListItem } from './ArticleListItem';
 
 export interface IArticleListStateProps {
     readonly data: ContentItem;
+    readonly query: Record<string, string | string[] | undefined>;
   }
   
   export interface IArticleListDispatchProps {
@@ -36,7 +37,7 @@ export interface IArticleListStateProps {
     }
   
     render() {
-      const { data } = this.props;
+      const { data, query } = this.props;
       return (
         <section className="article-list" >
           <div className="container">
@@ -59,6 +60,7 @@ export interface IArticleListStateProps {
               <div className="col-md-12">
                   {data.article.map((article: ContentItem) => (
                     <ArticleListItem
+                      query={query}
                       key={article.system.id}
                       data={article}
                     />

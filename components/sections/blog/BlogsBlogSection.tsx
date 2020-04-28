@@ -12,6 +12,7 @@ import { BlogsBlogSectionItem } from './BlogsBlogSectionItem';
 
 export interface IBlogsBlogSectionStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IBlogsBlogSectionDispatchProps {
@@ -37,7 +38,7 @@ export class BlogsBlogSection extends React.PureComponent<IBlogsBlogSectionProps
   }
 
   render() {
-    const { data } = this.props;
+    const { data, query } = this.props;
     return (
       <section className="article">
         <div className="container">
@@ -70,6 +71,7 @@ export class BlogsBlogSection extends React.PureComponent<IBlogsBlogSectionProps
               >
                 {data.article.map((article: ContentItem) => (
                   <BlogsBlogSectionItem
+                    query={query}
                     key={article.system.id}
                     data={article}
                   />

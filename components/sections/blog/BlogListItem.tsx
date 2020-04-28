@@ -2,12 +2,14 @@ import { ContentItem } from 'kentico-cloud-delivery';
 import { NextFC } from 'next';
 import PropTypes, { ValidationMap } from 'prop-types';
 import React from 'react';
-import { stripPTags } from '../../../utilities/utils';
+import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
 import { getItemElementRenderer } from '../../ItemElementValue';
+import { IElementStringValue, IElementStringValueWithQuery } from '../auxiliarytypes';
 
 
 export interface IBlogListItemStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface IBlogListItemDispatchProps {
@@ -31,6 +33,7 @@ const BlogTitle = getItemElementRenderer(
   )),
 );
 
+const MAX_CHAR = 200;
 const BlogContent = getItemElementRenderer(
   'content',
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
@@ -38,25 +41,25 @@ const BlogContent = getItemElementRenderer(
       ref={ref}
       className="mb-0"
     >
-      {stripPTags(value)}
+      {stripPTags(value).substring(0,MAX_CHAR) + "..."}
     </p>
   )),
 );
 
 const BlogReadMore = getItemElementRenderer(
 'system.codename',
-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
     <a
       ref={ref}
       className="mb-0"
-      href={'/blog?name='+ value}
+      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
     >
       READ MORE
     </a>
   )),
 );
 
-export const BlogListItem: NextFC<IBlogListItemProps> = ({ data }) => {
+export const BlogListItem: NextFC<IBlogListItemProps> = ({ data, query }) => {
   return (
     <div
       className="item"
@@ -70,6 +73,7 @@ export const BlogListItem: NextFC<IBlogListItemProps> = ({ data }) => {
             data={data}
           />
           <BlogReadMore
+            query={query}
             data={data}
           />
         </div>

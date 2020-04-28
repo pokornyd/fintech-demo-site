@@ -6,11 +6,13 @@ import { getItemElementRenderer } from '../../ItemElementValue';
 import { getProjectApiKey } from '../../../pages/topics'
 import { ArticleListItem} from '../article/ArticleListItem';
 import { BlogListItem} from '../blog/BlogListItem';
+import { IElementStringValue } from '../auxiliarytypes';
 
 
 
 export interface ITopicListItemStateProps {
   readonly data: ContentItem;
+  readonly query: Record<string, string | string[] | undefined>;
 }
 
 export interface ITopicListItemDispatchProps {
@@ -26,19 +28,16 @@ const propTypes: ValidationMap<ITopicListItemProps> = {
 const TopicTitle = getItemElementRenderer(
   'name',
   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
-    <div className='row'>
+    <div className='pb-5'>
       <h2>
         {value}
       </h2>
-      <br/>
-      <br/>
-      <br/>
     </div>
   )),
 );
 
 
-export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, query }) => {
   return (
     <div
       className="item"
@@ -52,6 +51,7 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
           {data.related_posts.filter((article: ContentItem) => article.system.type == 'article').map((article: ContentItem) => ( 
                     
                     <ArticleListItem
+                      query={query}
                       key={article.system.id}
                       data={article}
                     />
@@ -60,6 +60,7 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
           {data.related_posts.filter((blog: ContentItem) => blog.system.type == 'blog_post').map((blog: ContentItem) => ( 
                     
                     <BlogListItem
+                      query={query}
                       key={blog.system.id}
                       data={blog}
                     />

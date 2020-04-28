@@ -32,6 +32,7 @@ type Content = {
 };
 
 type ArticlesProps = {
+  readonly queryObj: Record<string, string | string[] | undefined>;
   readonly content: Content;
   readonly navigation: Content;
   readonly brandDetails: Content;
@@ -64,6 +65,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
 type ItemMap = { readonly [codename: string]: ContentItem };
 
 const Articles: NextFC<ArticlesProps> = ({
+    queryObj,
     brandDetails,
     content,
     isPreview,
@@ -97,6 +99,7 @@ const Articles: NextFC<ArticlesProps> = ({
           <PreLoader />
   
           <NavBar
+            query={queryObj}
             navigation={navigation.item}
             brandDetails={brandDetails.item}
           />
@@ -115,6 +118,7 @@ const Articles: NextFC<ArticlesProps> = ({
                   <Component
                     key={section.system.id}
                     data={section}
+                    query={queryObj}
                   />
                 );
               })
@@ -130,6 +134,7 @@ const Articles: NextFC<ArticlesProps> = ({
   };
   
   Articles.getInitialProps = async ({ query, req }) => {
+    const queryObj = query;
     const hostname = req ? req.headers.host : location.hostname;
     const isPreview = Object.hasOwnProperty.call(query, 'preview');
     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
@@ -173,6 +178,7 @@ const Articles: NextFC<ArticlesProps> = ({
       projectId,
       removeScrollbar,
       sections,
+      queryObj,
     };
   };
   
