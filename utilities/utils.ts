@@ -3,7 +3,7 @@ export const stripPTags = (html: string) => {
 };
 
 export const getProjectIdFromQuery = (query: Record<string, string | string[] | undefined>): string => {
-  return (query.projectid || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
+  return (query.projectid || '07a0e6e2-7522-0168-4abe-96ca54ee68e3') as string;
 };
 
 export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {

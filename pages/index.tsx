@@ -16,6 +16,7 @@ import { BlogSection } from '../components/sections/blog/BlogSection';
 import { FooterSection } from '../components/sections/footer/FooterSection';
 import { PortfolioSection } from '../components/sections/portfolio/PortfolioSection';
 import { ServiceSection } from '../components/sections/service/ServiceSection';
+import { RecommendationClient } from '@kentico/kontent-recommendations';
 import { TestimonialsSection } from '../components/sections/testimonials/TestimonialsSection';
 import {
   ContentItem,

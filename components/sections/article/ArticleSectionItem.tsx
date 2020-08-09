@@ -24,16 +24,16 @@ const propTypes: ValidationMap<IArticleSectionItemProps> = {
 const ArticleTitle = getItemElementRenderer(
   'title',
   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
-    <h4
+    <h3
       className="article-title"
     >
       {value}
-    </h4>
+    </h3>
   )),
 );
 
 const ArticleContent = getItemElementRenderer(
-  'content',
+  'subtitle',
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <p
       ref={ref}
@@ -65,6 +65,9 @@ export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data, que
           <ArticleTitle
             data={data}
           />
+          {/* <ArticleSubTitle
+            data={data}
+          /> */}
           <ArticleContent
             data={data}
           />

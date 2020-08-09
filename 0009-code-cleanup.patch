@@ -1,0 +1,25 @@
+From ce98f15bb5da078b9df6fdcbe2bd64ab548f5bf7 Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Fri, 24 Apr 2020 16:35:08 +1000
+Subject: [PATCH 09/14] code cleanup
+
+---
+ pages/topics.tsx | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index 2200261..d73d593 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -117,8 +117,6 @@ const Topics: NextFC<TopicsProps> = ({
+                   <Component
+                     key={section.system.id}
+                     data={section}
+-                    dataArticles={section}
+-                    dataBlogs={section}
+                   />
+                 );
+               })
+-- 
+2.19.1.windows.1
+

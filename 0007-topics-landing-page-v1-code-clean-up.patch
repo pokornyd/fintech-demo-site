@@ -1,0 +1,182 @@
+From 9ee910112a68f2cdf5f9ebd7fb5d21bb944dd7c6 Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Fri, 24 Apr 2020 14:05:28 +1000
+Subject: [PATCH 07/14] topics landing page v1, code clean up
+
+---
+ components/sections/topic/TopicList.tsx     | 10 +------
+ components/sections/topic/TopicListItem.tsx | 30 +++++++--------------
+ pages/topics.tsx                            | 18 ++-----------
+ 3 files changed, 13 insertions(+), 45 deletions(-)
+
+diff --git a/components/sections/topic/TopicList.tsx b/components/sections/topic/TopicList.tsx
+index 59e613e..d3b8180 100644
+--- a/components/sections/topic/TopicList.tsx
++++ b/components/sections/topic/TopicList.tsx
+@@ -14,8 +14,6 @@ import { TopicListItem } from './TopicListItem';
+ 
+ export interface ITopicListStateProps {
+     readonly data: ContentItem;
+-    readonly dataArticles: ContentItem;
+-    readonly dataBlogs: ContentItem;
+   }
+   
+   export interface ITopicListDispatchProps {
+@@ -25,9 +23,7 @@ export interface ITopicListStateProps {
+   }
+   
+   const propTypes: ValidationMap<ITopicListProps> = {
+-    data: PropTypes.any.isRequired,
+-    dataArticles: PropTypes.any.isRequired,
+-    dataBlogs: PropTypes.any.isRequired,
++    data: PropTypes.any.isRequired
+   };
+   
+   
+@@ -45,8 +41,6 @@ export interface ITopicListStateProps {
+   
+     render() {
+       const { data } = this.props;
+-      const { dataArticles } = this.props;
+-      const { dataBlogs} = this.props;
+       return (
+         <section className="topic-list" >
+           <div className="container">
+@@ -73,8 +67,6 @@ export interface ITopicListStateProps {
+                     <TopicListItem
+                       key={topic.system.id}
+                       data={topic}
+-                      dataArticles={dataArticles}
+-                      dataBlogs={dataBlogs}
+                     />
+                   ))}                 
+                 </div>
+diff --git a/components/sections/topic/TopicListItem.tsx b/components/sections/topic/TopicListItem.tsx
+index 9b78851..3d1d059 100644
+--- a/components/sections/topic/TopicListItem.tsx
++++ b/components/sections/topic/TopicListItem.tsx
+@@ -11,8 +11,6 @@ import { BlogListItem} from '../blog/BlogListItem';
+ 
+ export interface ITopicListItemStateProps {
+   readonly data: ContentItem;
+-  readonly dataArticles: ContentItem;
+-  readonly dataBlogs: ContentItem;
+ }
+ 
+ export interface ITopicListItemDispatchProps {
+@@ -22,9 +20,7 @@ interface ITopicListItemProps extends ITopicListItemStateProps, ITopicListItemDi
+ }
+ 
+ const propTypes: ValidationMap<ITopicListItemProps> = {
+-  data: PropTypes.any.isRequired,
+-  dataArticles: PropTypes.any.isRequired,
+-  dataBlogs: PropTypes.any.isRequired,
++  data: PropTypes.any.isRequired
+ };
+ 
+ const TopicTitle = getItemElementRenderer(
+@@ -41,17 +37,8 @@ const TopicTitle = getItemElementRenderer(
+   )),
+ );
+ 
+-// const RelatedPosts = getItemElementRenderer(
+-//   'related_posts',
+-//   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({value}, ref) =>(
+-//     <h4>
+-//       {value}
+-//     </h4>
+-//   )),
+-// );
+ 
+-
+-export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, dataArticles, dataBlogs }) => {
++export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+   return (
+     <div
+       className="item"
+@@ -62,19 +49,22 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, dataArticles,
+           <TopicTitle
+             data={data}
+           /> 
+-         
+-          {dataArticles.article.map((article: ContentItem) => ( //if contentItem is linked display, otherwise skip
++          {data.related_posts.filter((article: ContentItem) => article.system.type == 'article').map((article: ContentItem) => ( 
++                    
+                     <ArticleListItem
+                       key={article.system.id}
+                       data={article}
+                     />
+-                  ))}
+-          {dataBlogs.blog.map((blog: ContentItem) => (
++           ))}
++
++          {data.related_posts.filter((blog: ContentItem) => blog.system.type == 'blog_post').map((blog: ContentItem) => ( 
++                    
+                     <BlogListItem
+                       key={blog.system.id}
+                       data={blog}
+                     />
+-                  ))}
++           ))}
++         
+ 
+         </div>
+       </div>
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index 820a13b..2200261 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -146,8 +146,6 @@ const Topics: NextFC<TopicsProps> = ({
+     const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
+     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
+     const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
+-    //const { debug: forget4, ...nestedContent } = await client.items().inFilter("system.type", ["article", "blog"]).getPromise();
+-
+     
+     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+       return {
+@@ -156,15 +154,8 @@ const Topics: NextFC<TopicsProps> = ({
+       };
+     }, {} as ItemMap);
+ 
+-    // const nestedLinkedItemsByCodename = nestedContent.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+-    //   return {
+-    //     ...map,
+-    //     [contentItem.system.codename]: contentItem,
+-    //   };
+-    // }, {} as ItemMap);
+   
+     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
+-    //const nestedSections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => nestedLinkedItemsByCodename[codename]);
+ 
+     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
+     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
+@@ -173,10 +164,6 @@ const Topics: NextFC<TopicsProps> = ({
+     if (topicList) {  
+         var { items } = await client.items().type('topic').getPromise(); // get all topics  
+        topicList.topic = items;
+-       var { items } = await client.items().type('article').getPromise(); // get all articles
+-       topicList.article = items;
+-       var { items } = await client.items().type('blog_post').getPromise(); // get all blogs
+-       topicList.blog = items;
+     }
+ 
+     if (articleSection) {  // top 3 articles    
+@@ -185,12 +172,11 @@ const Topics: NextFC<TopicsProps> = ({
+     }
+ 
+     if (articleList) { 
+-        const { ...items } = await client.item('car').getPromise(); // get all articles     
+-        articleList.article = items.linkedItems; 
++        var { items } = await client.items().type('blog_post').getPromise(); // get all blogs     
++        articleList.article = items; 
+     }
+   
+ 
+-   
+   
+     return {
+       brandDetails,
+-- 
+2.19.1.windows.1
+

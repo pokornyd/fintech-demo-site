@@ -1,0 +1,81 @@
+From d9bc54cbc83573d723290ede00024617d81c4e0b Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Fri, 24 Apr 2020 14:17:47 +1000
+Subject: [PATCH 08/14] code cleanup - unified codename query string to >name<
+
+---
+ components/sections/article/ArticleListItem.tsx    | 2 +-
+ components/sections/article/ArticleSectionItem.tsx | 2 +-
+ pages/blog.tsx                                     | 4 ++--
+ utilities/utils.ts                                 | 6 +-----
+ 4 files changed, 5 insertions(+), 9 deletions(-)
+
+diff --git a/components/sections/article/ArticleListItem.tsx b/components/sections/article/ArticleListItem.tsx
+index e7c6c55..609e6c3 100644
+--- a/components/sections/article/ArticleListItem.tsx
++++ b/components/sections/article/ArticleListItem.tsx
+@@ -49,7 +49,7 @@ const ArticleReadMore = getItemElementRenderer(
+     <a
+       ref={ref}
+       className="mb-0"
+-      href={'/article?codename='+ value}
++      href={'/article?name='+ value}
+     >
+       READ MORE
+     </a>
+diff --git a/components/sections/article/ArticleSectionItem.tsx b/components/sections/article/ArticleSectionItem.tsx
+index 3bf26fa..9c22c59 100644
+--- a/components/sections/article/ArticleSectionItem.tsx
++++ b/components/sections/article/ArticleSectionItem.tsx
+@@ -49,7 +49,7 @@ const ArticleReadMore = getItemElementRenderer(
+       <a
+         ref={ref}
+         className="mb-0"
+-        href={'/article?codename='+ value}
++        href={'/article?name='+ value}
+       >
+         READ MORE
+       </a>
+diff --git a/pages/blog.tsx b/pages/blog.tsx
+index 4bcb8a6..3a8a828 100644
+--- a/pages/blog.tsx
++++ b/pages/blog.tsx
+@@ -23,7 +23,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
+ import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
+ import fetch from 'cross-fetch';
+ import { getProjectIdFromQuery } from '../utilities/utils';
+-import { getBlogCodenameFromQuery } from '../utilities/utils';
++import { getCodenameFromQuery } from '../utilities/utils';
+ import { BlogDetail} from '../components/sections/blog/BlogDetail'
+ import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
+ import { BlogList } from '../components/sections/blog/BlogList';
+@@ -156,7 +156,7 @@ const Articles: NextFC<ArticlesProps> = ({
+     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
+ 
+     if (blogList) {      
+-      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise();
++      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getCodenameFromQuery(query)).getPromise();
+         blogList.article = items; 
+     }
+ 
+diff --git a/utilities/utils.ts b/utilities/utils.ts
+index f4becba..85c9866 100644
+--- a/utilities/utils.ts
++++ b/utilities/utils.ts
+@@ -6,12 +6,8 @@ export const getProjectIdFromQuery = (query: Record<string, string | string[] |
+   return (query.projectId || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
+ };
+ 
+-export const getBlogCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
+-  return (query.name) as string;
+-};
+-
+ export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
+-  return (query.codename) as string;
++  return (query.name) as string;
+ };
+ 
+ 
+-- 
+2.19.1.windows.1
+

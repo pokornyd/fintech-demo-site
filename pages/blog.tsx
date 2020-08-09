@@ -25,6 +25,7 @@ import { getProjectIdFromQuery } from '../utilities/utils';
 import { getCodenameFromQuery } from '../utilities/utils';
 import { BlogDetail} from '../components/sections/blog/BlogDetail'
 import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
+import { RecommendationClient } from '@kentico/kontent-recommendations';
 
 
 type Content = {
@@ -139,11 +140,17 @@ const Articles: NextFC<ArticlesProps> = ({
     const hostname = req ? req.headers.host : location.hostname;
     const isPreview = Object.hasOwnProperty.call(query, 'preview');
     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+    const recommenderKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1NmNkNzg5OS1iNzMzLTAwNWUtNTkyNC05ZDQ1MjNiMGFjYjYiLCJwaWQiOiI1NmNkNzg5OS1iNzMzLTAwNWUtNTkyNC05ZDQ1MjNiMGFjYjYiLCJqdGkiOiIxYlNTLTNVSGJNVFZ5bnJVIiwiaXNzIjoicmVjb21tZW5kLmtvbnRlbnQuYWkiLCJhdWQiOiJyZWNvbW1lbmQua29udGVudC5haSJ9.CXJ_Rqi2KkDEEgPUdKoZYNKiYTWJL7zgg4eko-m_GFE';
     const projectId = getProjectIdFromQuery(query);
     const client = new DeliveryClient({
       projectId,
       enablePreviewMode: isPreview,
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
+    });
+    const recommendationClient = new RecommendationClient({
+      projectId: projectId,
+      apiKey: recommenderKey
+      //baseUrl: 'https://recommend.kontent.ai/api/v2/'
     });
     const { debug: forget1, ...content } = await client.item('blogs').withParameter('depth', '10').getPromise();
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
@@ -167,7 +174,16 @@ const Articles: NextFC<ArticlesProps> = ({
     }
 
     if (blogCarousel) {      
+      var { data } = await recommendationClient.recommendItems()
+      .withData({
+        currentItemCodename: 'blog_5',//getCodenameFromQuery(query),
+        requestedTypeCodename: 'blog_post',
+        responseLimit: 5,
+        visitId: 'z'       
+      }).toPromise();
+      //console.log(data);
       var { items } = await client.items().type('blog_post').getPromise();
+      console.log({items});
       blogCarousel.article = items;
     }
   

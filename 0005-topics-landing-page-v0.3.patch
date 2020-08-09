@@ -1,0 +1,25 @@
+From dcb958cfe5a01ac330f70e6fe43a11ea92308051 Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Fri, 24 Apr 2020 09:27:47 +1000
+Subject: [PATCH 05/14] topics landing page v0.3
+
+---
+ pages/topics.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index 3668f48..2907b2d 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -48,7 +48,7 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
+   'section_hero_unit': Header,
+   'section_highlighted_features': ServiceSection,
+   'section_articles': ArticleSection,
+-//   'section_article_list': ArticleList,
++  'section_article_list': ArticleList,
+   'section_topic_list': TopicList
+ };
+ 
+-- 
+2.19.1.windows.1
+

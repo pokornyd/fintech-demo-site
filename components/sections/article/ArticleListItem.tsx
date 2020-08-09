@@ -34,7 +34,7 @@ const ArticleTitle = getItemElementRenderer(
 );
 
 const ArticleContent = getItemElementRenderer(
-  'content',
+  'subtitle',
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <p
       ref={ref}

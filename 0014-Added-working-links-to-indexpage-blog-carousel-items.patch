@@ -1,0 +1,70 @@
+From 2f37e0bf490bb1fb148d4b212e1fe9fe74e2f3bf Mon Sep 17 00:00:00 2001
+From: Daniel Pokorny <danielp@kentico.com>
+Date: Tue, 28 Apr 2020 21:07:25 +0200
+Subject: [PATCH 14/14] Added working links to indexpage blog carousel items
+
+---
+ components/sections/blog/BlogCarouselItem.tsx | 6 +++---
+ components/sections/blog/BlogDetailItem.tsx   | 5 +++--
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/components/sections/blog/BlogCarouselItem.tsx b/components/sections/blog/BlogCarouselItem.tsx
+index c773e3d..f7997e8 100644
+--- a/components/sections/blog/BlogCarouselItem.tsx
++++ b/components/sections/blog/BlogCarouselItem.tsx
+@@ -5,7 +5,7 @@ import React from 'react';
+ import { printFuzzyDate } from '../../../utilities/timeUtils';
+ import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
+-import { IElementStringValueWithQuery, IElementStringValue } from '../auxiliarytypes';
++import { IElementStringValueWithQuery, IElementStringValue, IElementStringValueWithQueryAndData } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogCarouselItemStateProps {
+@@ -67,11 +67,11 @@ const PostPublishDate = getItemElementRenderer(
+ 
+ const PostTitle = getItemElementRenderer(
+   'title',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
++  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQueryAndData>(({ value, query, data }, ref) => (
+     <a
+       ref={ref}
+       className="post-title"
+-      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
++      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + data.system.codename}
+     >
+       {value}
+     </a>
+diff --git a/components/sections/blog/BlogDetailItem.tsx b/components/sections/blog/BlogDetailItem.tsx
+index 36fc0d6..f2f1814 100644
+--- a/components/sections/blog/BlogDetailItem.tsx
++++ b/components/sections/blog/BlogDetailItem.tsx
+@@ -4,6 +4,7 @@ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { stripPTags } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValue } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogDetailItemStateProps {
+@@ -36,7 +37,7 @@ const BlogLeadParagraph = getItemElementRenderer(
+   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+     <div
+       ref={ref}
+-      className="lead"
++      className="lead pt-4"
+     >
+       {stripPTags(value)}
+     </div>
+@@ -48,7 +49,7 @@ const BlogContent = getItemElementRenderer(
+   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+     <div
+       ref={ref}
+-      className="mb-0"
++      className="mb-0 pt-4"
+     >
+       {stripPTags(value)}
+     </div>
+-- 
+2.19.1.windows.1
+

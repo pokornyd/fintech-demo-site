@@ -23,6 +23,8 @@
 	},
 	"homepage": "https://github.com/KenticoInternal/fintech-demo-site#readme",
 	"dependencies": {
+		"@kentico/kontent-delivery": "^9.1.1",
+		"@kentico/kontent-recommendations": "0.0.5",
 		"@types/classnames": "2.2.7",
 		"@types/next": "8.0.1",
 		"@types/react": "16.8.3",
@@ -44,7 +46,7 @@
 		"react-dom": "16.8.2",
 		"react-router": "5.0.1",
 		"react-set-state-usage": "2.0.1",
-		"rxjs": "6.4.0",
+		"rxjs": "^6.6.0",
 		"stylus": "0.54.5",
 		"ts-node": "8.2.0",
 		"tslint": "5.12.1",

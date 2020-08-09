@@ -31,14 +31,26 @@ const ArticleTitle = getItemElementRenderer(
   )),
 );
 
+
+const ArticleSubTitle = getItemElementRenderer(
+  'subtitle',
+  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
+    <h2
+      className="article-title"
+    >
+      {value}
+    </h2>
+  )),
+);
+
 const ArticleContent = getItemElementRenderer(
   'content',
   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
     <div
       ref={ref}
       className="lead"
-    >
-      {stripPTags(value)}
+      dangerouslySetInnerHTML={{__html:value}}
+    >      
     </div>
   )),
 );
@@ -53,6 +65,9 @@ export const ArticleDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => 
       <div className="article">
         <div className="article-info">
           <ArticleTitle
+            data={data}
+          />
+          <ArticleSubTitle
             data={data}
           />
           <ArticleContent

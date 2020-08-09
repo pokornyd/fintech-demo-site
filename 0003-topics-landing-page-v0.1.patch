@@ -1,0 +1,386 @@
+From 66f1fdda3ec92530ae5be13d09b35c6e119e7dc3 Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Wed, 22 Apr 2020 15:54:29 +1000
+Subject: [PATCH 03/14] topics landing page v0.1
+
+---
+ components/sections/topic/TopicList.tsx     |  81 ++++++++
+ components/sections/topic/TopicListItem.tsx |  54 ++++++
+ pages/articles.tsx                          |   2 +-
+ pages/topic.tsx                             |   0
+ pages/topics.tsx                            | 195 ++++++++++++++++++++
+ 5 files changed, 331 insertions(+), 1 deletion(-)
+ create mode 100644 components/sections/topic/TopicList.tsx
+ create mode 100644 components/sections/topic/TopicListItem.tsx
+ create mode 100644 pages/topic.tsx
+ create mode 100644 pages/topics.tsx
+
+diff --git a/components/sections/topic/TopicList.tsx b/components/sections/topic/TopicList.tsx
+new file mode 100644
+index 0000000..fbe1689
+--- /dev/null
++++ b/components/sections/topic/TopicList.tsx
+@@ -0,0 +1,81 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { runCarousel } from '../../../utilities/carousel';
++import {
++  Description,
++  PreTitle,
++  Title,
++} from '../../sectionIntroductionRenderers';
++import { TopicListItem } from './TopicListItem';
++
++
++
++export interface ITopicListStateProps {
++    readonly data: ContentItem;
++  }
++  
++  export interface ITopicListDispatchProps {
++  }
++  
++  interface ITopicListProps extends ITopicListStateProps, ITopicListDispatchProps {
++  }
++  
++  const propTypes: ValidationMap<ITopicListProps> = {
++    data: PropTypes.any.isRequired,
++  };
++  
++  
++  export class TopicList extends React.PureComponent<ITopicListProps> {
++    static displayName = 'TopicList';
++    static propTypes = propTypes;
++  
++    private readonly carouselRef = React.createRef<HTMLDivElement>();
++  
++    componentDidMount(): void {
++      if (this.carouselRef.current) {
++        runCarousel(this.carouselRef.current);
++      }
++    }
++  
++    render() {
++      const { data } = this.props;
++      return (
++        <section className="topic-list" >
++          <div className="container">
++            <div className="row">
++              <div className="mx-auto">
++                <div className="title text-center">
++                  <PreTitle
++                    data={data}
++                  />
++                  <Title
++                    data={data}
++                  />
++                  <Description
++                    data={data}
++                  />
++
++                </div>
++              </div>
++            </div>
++            <div className="row">
++              <div className="col-md-12">
++
++                  {data.topic.map((topic: ContentItem) => (
++                    <TopicListItem
++                      key={topic.system.id}
++                      data={topic}
++                    />
++                  ))}
++                </div>
++              
++            </div>
++          </div>
++          
++        </section>
++      );
++    }
++  }
++  
++  
+\ No newline at end of file
+diff --git a/components/sections/topic/TopicListItem.tsx b/components/sections/topic/TopicListItem.tsx
+new file mode 100644
+index 0000000..6a0a7d4
+--- /dev/null
++++ b/components/sections/topic/TopicListItem.tsx
+@@ -0,0 +1,54 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import { NextFC } from 'next';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { getItemElementRenderer } from '../../ItemElementValue';
++
++
++export interface ITopicListItemStateProps {
++  readonly data: ContentItem;
++}
++
++export interface ITopicListItemDispatchProps {
++}
++
++interface ITopicListItemProps extends ITopicListItemStateProps, ITopicListItemDispatchProps {
++}
++
++const propTypes: ValidationMap<ITopicListItemProps> = {
++  data: PropTypes.any.isRequired,
++};
++
++
++
++const TopicTitle = getItemElementRenderer(
++  'name',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    <h3>
++      {value}
++    </h3>
++  )),
++);
++
++
++export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
++  return (
++    <div
++      className="item"
++    >
++      <div className="topic">
++        <div className="topic-info">
++          <TopicTitle
++            data={data}
++          />          
++        </div>
++      </div>
++      <br/>
++      <br/>
++    </div>
++    
++  );
++};
++
++TopicListItem.displayName = 'TopicListItem';
++TopicListItem.propTypes = propTypes;
+diff --git a/pages/articles.tsx b/pages/articles.tsx
+index cba4a0f..203a478 100644
+--- a/pages/articles.tsx
++++ b/pages/articles.tsx
+@@ -155,7 +155,7 @@ const Articles: NextFC<ArticlesProps> = ({
+ 
+     console.log(sections);
+ 
+-    if (articleSection) {      
++    if (articleSection) {  // top 3 articles    
+       articleSection.article = items;
+     }
+ 
+diff --git a/pages/topic.tsx b/pages/topic.tsx
+new file mode 100644
+index 0000000..e69de29
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+new file mode 100644
+index 0000000..3668f48
+--- /dev/null
++++ b/pages/topics.tsx
+@@ -0,0 +1,195 @@
++import Head from 'next-server/head';
++import {
++  ComponentClass,
++  FC,
++} from 'react';
++import * as React from 'react';
++import { NextFC } from 'next';
++import { CannotRender } from '../components/CannotRender';
++import { GoToTop } from '../components/GoToTop';
++import { Header } from '../components/sections/header/Header';
++import { NavBar } from '../components/navbar/NavBar';
++import { Layout } from '../components/layout/layout';
++import { PreLoader } from '../components/PreLoader';
++import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
++import { ArticleSection } from '../components/sections/article/ArticleSection';
++import { ArticleList } from '../components/sections/article/ArticleList';
++import { TopicList } from '../components/sections/topic/TopicList';
++import { FooterSection } from '../components/sections/footer/FooterSection';
++import { ServiceSection } from '../components/sections/service/ServiceSection';
++import {
++  ContentItem,
++  DeliveryClient,
++} from 'kentico-cloud-delivery';
++import { PreviewContext } from '../components/context/PreviewContext';
++import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
++import fetch from 'cross-fetch';
++import { getProjectIdFromQuery } from '../utilities/utils';
++
++
++type Content = {
++  readonly item: ContentItem;
++  readonly linkedItems: ReadonlyArray<ContentItem>;
++};
++
++type TopicsProps = {
++  readonly content: Content;
++  readonly navigation: Content;
++  readonly brandDetails: Content;
++  readonly sections: ReadonlyArray<ContentItem>;
++  readonly isPreview: boolean;
++  readonly removeScrollbar: boolean;
++  readonly projectId: string;
++}
++
++const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any> } = {
++  'none': CannotRender,
++  'section_about_us': AboutUsSection,
++  'section_hero_unit': Header,
++  'section_highlighted_features': ServiceSection,
++  'section_articles': ArticleSection,
++//   'section_article_list': ArticleList,
++  'section_topic_list': TopicList
++};
++
++const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
++  console.log('hostname:', hostname);
++  return (await (await fetch(`http${hostname.includes('localhost') ? '' : 's'}://${hostname}/api-key/${projectId}`)).json()).key;
++};
++
++const getRenderComponentForSection = (sectionType: string): (ComponentClass<any> | FC<any>) => {
++  if (SectionRendererMap[sectionType]) {
++    return SectionRendererMap[sectionType];
++  }
++  return SectionRendererMap['none'];
++};
++type ItemMap = { readonly [codename: string]: ContentItem };
++
++const Topics: NextFC<TopicsProps> = ({
++    brandDetails,
++    content,
++    isPreview,
++    navigation,
++    projectId,
++    removeScrollbar,
++    sections
++  }) => {
++  
++    return (
++      <PreviewContext.Provider
++        value={{
++          isPreview,
++          projectId,
++        }}
++      >
++        <Layout>
++          <Head>
++            <title>{content.item.page_title.value}</title>
++            {removeScrollbar && (
++              <style>
++                {`::-webkit-scrollbar { 
++      display: none; 
++  }
++  html,body{
++    scrollbar-width: none;
++  }`}
++              </style>
++            )}
++          </Head>
++          <PreLoader />
++  
++          <NavBar
++            navigation={navigation.item}
++            brandDetails={brandDetails.item}
++          />
++  
++          <ContentItemElementContext.Provider
++            value={{
++              itemId: content.item.system.id,
++              language: content.item.system.language,
++              elementCodename: 'sections',
++            }}
++          >
++            {
++              sections.map((section: ContentItem) => {
++                const Component = getRenderComponentForSection(section.system.type);
++                return (
++                  <Component
++                    key={section.system.id}
++                    data={section}
++                  />
++                );
++              })
++            }
++          </ContentItemElementContext.Provider>
++          <FooterSection
++            data={brandDetails.item}
++          />
++          <GoToTop />
++        </Layout>
++      </PreviewContext.Provider>
++    );
++  };
++  
++  Topics.getInitialProps = async ({ query, req }) => {
++    const hostname = req ? req.headers.host : location.hostname;
++    const isPreview = Object.hasOwnProperty.call(query, 'preview');
++    const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
++    const projectId = getProjectIdFromQuery(query);
++    const client = new DeliveryClient({
++      projectId,
++      enablePreviewMode: isPreview,
++      previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
++    });
++    const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
++    const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
++    const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
++
++    
++    const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
++      return {
++        ...map,
++        [contentItem.system.codename]: contentItem,
++      };
++    }, {} as ItemMap);
++  
++    const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
++   
++    const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
++    const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
++    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list');
++
++    
++    
++
++    if (topicList) {  
++        var { items } = await client.items().type('topic').getPromise(); // get all topics    
++       topicList.topic = items;
++    }
++
++    if (articleSection) {  // top 3 articles    
++      var { items } = await client.items().type('article').getPromise(); // get all articles
++      articleSection.article = items;
++    }
++
++    if (articleList) { 
++        var { items } = await client.items().type('article').getPromise(); // get all articles     
++        articleList.article = await client.items().type('article').getPromise(); 
++    }
++  
++
++   
++  
++    return {
++      brandDetails,
++      content: content as Content,
++      isPreview,
++      navigation,
++      projectId,
++      removeScrollbar,
++      sections
++    };
++  };
++  
++  export default Topics;
++  
+\ No newline at end of file
+-- 
+2.19.1.windows.1
+

@@ -1,0 +1,20 @@
+From dcf85ae00011f27d0750337a58d223025eeb189e Mon Sep 17 00:00:00 2001
+From: Daniel Pokorny <52500882+pokornyd@users.noreply.github.com>
+Date: Mon, 27 Apr 2020 11:56:43 +0200
+Subject: [PATCH 11/14] Delete Procfile
+
+---
+ Procfile | 1 -
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 Procfile
+
+diff --git a/Procfile b/Procfile
+deleted file mode 100644
+index 063b78f..0000000
+--- a/Procfile
++++ /dev/null
+@@ -1 +0,0 @@
+-web: npm start
+-- 
+2.19.1.windows.1
+

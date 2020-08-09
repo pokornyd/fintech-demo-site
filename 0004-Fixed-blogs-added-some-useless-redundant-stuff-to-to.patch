@@ -1,0 +1,807 @@
+From d13c2f23d5e2c7568eee0f62605516008b27e5a7 Mon Sep 17 00:00:00 2001
+From: Daniel Pokorny <danielp@kentico.com>
+Date: Fri, 24 Apr 2020 00:01:55 +0200
+Subject: [PATCH 04/14] Fixed blogs, added some useless redundant stuff to
+ topics while trying to make it work... so far without success
+
+---
+ components/sections/blog/BlogDetail.tsx       | 72 +++++++++++++++
+ components/sections/blog/BlogDetailItem.tsx   | 89 +++++++++++++++++++
+ components/sections/blog/BlogList.tsx         | 78 ++++++++++++++++
+ components/sections/blog/BlogListItem.tsx     | 85 ++++++++++++++++++
+ components/sections/blog/BlogsBlogSection.tsx | 85 ++++++++++++++++++
+ .../sections/blog/BlogsBlogSectionItem.tsx    | 82 +++++++++++++++++
+ components/sections/topic/TopicList.tsx       |  5 +-
+ components/sections/topic/TopicListItem.tsx   | 18 +++-
+ pages/blog.tsx                                | 20 ++---
+ pages/blogs.tsx                               | 10 +--
+ pages/topics.tsx                              | 27 +++---
+ 11 files changed, 540 insertions(+), 31 deletions(-)
+ create mode 100644 components/sections/blog/BlogDetail.tsx
+ create mode 100644 components/sections/blog/BlogDetailItem.tsx
+ create mode 100644 components/sections/blog/BlogList.tsx
+ create mode 100644 components/sections/blog/BlogListItem.tsx
+ create mode 100644 components/sections/blog/BlogsBlogSection.tsx
+ create mode 100644 components/sections/blog/BlogsBlogSectionItem.tsx
+
+diff --git a/components/sections/blog/BlogDetail.tsx b/components/sections/blog/BlogDetail.tsx
+new file mode 100644
+index 0000000..0aa4c81
+--- /dev/null
++++ b/components/sections/blog/BlogDetail.tsx
+@@ -0,0 +1,72 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { runCarousel } from '../../../utilities/carousel';
++import {
++  Description,
++  PreTitle,
++  Title,
++} from '../../sectionIntroductionRenderers';
++import { BlogDetailItem } from './BlogDetailItem';
++
++
++
++export interface IArticleDetailStateProps {
++    readonly data: ContentItem;
++  }
++  
++  export interface IArticleDetailDispatchProps {
++  }
++  
++  interface IArticleDetailProps extends IArticleDetailStateProps, IArticleDetailDispatchProps {
++  }
++  
++  const propTypes: ValidationMap<IArticleDetailProps> = {
++    data: PropTypes.any.isRequired,
++  };
++  
++  export class BlogDetail extends React.PureComponent<IArticleDetailProps> {
++    static displayName = 'BlogDetail';
++    static propTypes = propTypes;
++  
++    private readonly carouselRef = React.createRef<HTMLDivElement>();
++  
++    componentDidMount(): void {
++      if (this.carouselRef.current) {
++        runCarousel(this.carouselRef.current);
++      }
++    }
++  
++    render() {
++      const { data } = this.props;
++      return (
++        <section className="article-Detail" >
++          <div className="container">
++            <div className="row">
++              <div className="mx-auto">
++                <div className="title text-center">
++
++
++                </div>
++              </div>
++            </div>
++            <div className="row">
++              <div className="col-md-12">
++
++                  {data.article.map((article: ContentItem) => (
++                    <BlogDetailItem
++                      key={article.system.id}
++                      data={article}
++                    />
++                  ))}
++                </div>
++              
++            </div>
++          </div>
++          
++        </section>
++      );
++    }
++  }
++  
++  
+\ No newline at end of file
+diff --git a/components/sections/blog/BlogDetailItem.tsx b/components/sections/blog/BlogDetailItem.tsx
+new file mode 100644
+index 0000000..c2b7f67
+--- /dev/null
++++ b/components/sections/blog/BlogDetailItem.tsx
+@@ -0,0 +1,89 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import { NextFC } from 'next';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { stripPTags } from '../../../utilities/utils';
++import { getItemElementRenderer } from '../../ItemElementValue';
++
++
++export interface IArticleDetailItemStateProps {
++  readonly data: ContentItem;
++}
++
++export interface IArticleDetailItemDispatchProps {
++}
++
++interface IArticleDetailItemProps extends IArticleDetailItemStateProps, IArticleDetailItemDispatchProps {
++}
++
++const propTypes: ValidationMap<IArticleDetailItemProps> = {
++  data: PropTypes.any.isRequired,
++};
++
++
++
++const BlogTitle = getItemElementRenderer(
++  'title',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
++    <h1>
++      {value}
++    </h1>
++  )),
++);
++
++const BlogLeadParagraph = getItemElementRenderer(
++  'lead_paragraph',
++  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
++    <div
++      ref={ref}
++      className="lead"
++    >
++      {stripPTags(value)}
++    </div>
++  )),
++);
++
++const BlogContent = getItemElementRenderer(
++  'content',
++  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
++    <div
++      ref={ref}
++      className="mb-0"
++    >
++      {stripPTags(value)}
++    </div>
++  )),
++);
++
++
++
++
++
++export const BlogDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
++  return (
++    <div
++      className="item"
++    >
++      <div className="article">
++        <div className="article-info">
++          <BlogTitle
++            data={data}
++          />
++          <BlogLeadParagraph
++            data={data}
++          />
++          <BlogContent
++            data={data}
++          />
++          
++        </div>
++      </div>
++      <br/>
++      <br/>
++    </div>
++    
++  );
++};
++
++BlogDetailItem.displayName = 'BlogDetailItem';
++BlogDetailItem.propTypes = propTypes;
+diff --git a/components/sections/blog/BlogList.tsx b/components/sections/blog/BlogList.tsx
+new file mode 100644
+index 0000000..9af09e6
+--- /dev/null
++++ b/components/sections/blog/BlogList.tsx
+@@ -0,0 +1,78 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { runCarousel } from '../../../utilities/carousel';
++import {
++  Description,
++  PreTitle,
++  Title,
++} from '../../sectionIntroductionRenderers';
++import { BlogListItem } from './BlogListItem';
++
++export interface IArticleListStateProps {
++    readonly data: ContentItem;
++  }
++  
++  export interface IArticleListDispatchProps {
++  }
++  
++  interface IArticleListProps extends IArticleListStateProps, IArticleListDispatchProps {
++  }
++  
++  const propTypes: ValidationMap<IArticleListProps> = {
++    data: PropTypes.any.isRequired,
++  };
++  
++  export class BlogList extends React.PureComponent<IArticleListProps> {
++    static displayName = 'BlogList';
++    static propTypes = propTypes;
++  
++    private readonly carouselRef = React.createRef<HTMLDivElement>();
++  
++    componentDidMount(): void {
++      if (this.carouselRef.current) {
++        runCarousel(this.carouselRef.current);
++      }
++    }
++  
++    render() {
++      const { data } = this.props;
++      return (
++        <section className="article-list" >
++          <div className="container">
++            <div className="row">
++              <div className="mx-auto">
++                <div className="title text-center">
++                  <PreTitle
++                    data={data}
++                  />
++                  <Title
++                    data={data}
++                  />
++                  <Description
++                    data={data}
++                  />
++
++                </div>
++              </div>
++            </div>
++            <div className="row">
++              <div className="col-md-12">
++
++                  {data.article.map((article: ContentItem) => (
++                    <BlogListItem
++                      key={article.system.id}
++                      data={article}
++                    />
++                  ))}
++                </div>
++              
++            </div>
++          </div>
++          
++        </section>
++      );
++    }
++  }
++  
++  
+\ No newline at end of file
+diff --git a/components/sections/blog/BlogListItem.tsx b/components/sections/blog/BlogListItem.tsx
+new file mode 100644
+index 0000000..8674de5
+--- /dev/null
++++ b/components/sections/blog/BlogListItem.tsx
+@@ -0,0 +1,85 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import { NextFC } from 'next';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { stripPTags } from '../../../utilities/utils';
++import { getItemElementRenderer } from '../../ItemElementValue';
++
++
++export interface IArticleListItemStateProps {
++  readonly data: ContentItem;
++}
++
++export interface IArticleListItemDispatchProps {
++}
++
++interface IArticleListItemProps extends IArticleListItemStateProps, IArticleListItemDispatchProps {
++}
++
++const propTypes: ValidationMap<IArticleListItemProps> = {
++  data: PropTypes.any.isRequired,
++};
++
++
++
++const ArticleTitle = getItemElementRenderer(
++  'title',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    <h3>
++      {value}
++    </h3>
++  )),
++);
++
++const ArticleContent = getItemElementRenderer(
++  'content',
++  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
++    <p
++      ref={ref}
++      className="mb-0"
++    >
++      {stripPTags(value)}
++    </p>
++  )),
++);
++
++const ArticleReadMore = getItemElementRenderer(
++'system.codename',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    <a
++      ref={ref}
++      className="mb-0"
++      href={'/blog?name='+ value}
++    >
++      READ MORE
++    </a>
++  )),
++);
++
++export const BlogListItem: NextFC<IArticleListItemProps> = ({ data }) => {
++  return (
++    <div
++      className="item"
++    >
++      <div className="article">
++        <div className="article-info">
++          <ArticleTitle
++            data={data}
++          />
++          <ArticleContent
++            data={data}
++          />
++          <ArticleReadMore
++            data={data}
++          />
++        </div>
++      </div>
++      <br/>
++      <br/>
++    </div>
++    
++  );
++};
++
++BlogListItem.displayName = 'ArticleListItem';
++BlogListItem.propTypes = propTypes;
+diff --git a/components/sections/blog/BlogsBlogSection.tsx b/components/sections/blog/BlogsBlogSection.tsx
+new file mode 100644
+index 0000000..8ba2e0f
+--- /dev/null
++++ b/components/sections/blog/BlogsBlogSection.tsx
+@@ -0,0 +1,85 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { runCarousel } from '../../../utilities/carousel';
++import {
++  Description,
++  PreTitle,
++  Title,
++} from '../../sectionIntroductionRenderers';
++import { BlogsBlogSectionItem } from './BlogsBlogSectionItem';
++
++
++export interface IArticleSectionStateProps {
++  readonly data: ContentItem;
++}
++
++export interface IArticleSectionDispatchProps {
++}
++
++interface IArticleSectionProps extends IArticleSectionStateProps, IArticleSectionDispatchProps {
++}
++
++const propTypes: ValidationMap<IArticleSectionProps> = {
++  data: PropTypes.any.isRequired,
++};
++
++export class BlogsBlogSection extends React.PureComponent<IArticleSectionProps> {
++  static displayName = 'BlogsBlogSection';
++  static propTypes = propTypes;
++
++  private readonly carouselRef = React.createRef<HTMLDivElement>();
++
++  componentDidMount(): void {
++    if (this.carouselRef.current) {
++      runCarousel(this.carouselRef.current);
++    }
++  }
++
++  render() {
++    const { data } = this.props;
++    return (
++      <section className="article">
++        <div className="container">
++          <div className="row">
++            <div className="col-12 col-lg-8 mx-auto">
++              <div className="title text-center">
++                <PreTitle
++                  data={data}
++                />
++                <Title
++                  data={data}
++                />
++                <Description
++                  data={data}
++                />
++              </div>
++            </div>
++          </div>
++          <div className="row">
++            <div className="col-md-12">
++              <div
++                ref={this.carouselRef}
++                className="owl-carousel arrow-dark arrow-hover"
++                data-dots="false"
++                data-items-xl="3"
++                data-items-lg="3"
++                data-items-md="2"
++                data-items-sm="2"
++                data-items-xs="1"
++              >
++                {data.article.map((article: ContentItem) => (
++                  <BlogsBlogSectionItem
++                    key={article.system.id}
++                    data={article}
++                  />
++                ))}
++              </div>
++            </div>
++          </div>
++        </div>
++      </section>
++    );
++  }
++}
++
+diff --git a/components/sections/blog/BlogsBlogSectionItem.tsx b/components/sections/blog/BlogsBlogSectionItem.tsx
+new file mode 100644
+index 0000000..8e9e804
+--- /dev/null
++++ b/components/sections/blog/BlogsBlogSectionItem.tsx
+@@ -0,0 +1,82 @@
++import { ContentItem } from 'kentico-cloud-delivery';
++import { NextFC } from 'next';
++import PropTypes, { ValidationMap } from 'prop-types';
++import React from 'react';
++import { stripPTags } from '../../../utilities/utils';
++import { getItemElementRenderer } from '../../ItemElementValue';
++
++
++export interface IArticleSectionItemStateProps {
++  readonly data: ContentItem;
++}
++
++export interface IArticleSectionItemDispatchProps {
++}
++
++interface IArticleSectionItemProps extends IArticleSectionItemStateProps, IArticleSectionItemDispatchProps {
++}
++
++const propTypes: ValidationMap<IArticleSectionItemProps> = {
++  data: PropTypes.any.isRequired,
++};
++
++const BlogTitle = getItemElementRenderer(
++  'title',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
++    <h4
++      className="article-title"
++    >
++      {value}
++    </h4>
++  )),
++);
++
++const BlogContent = getItemElementRenderer(
++  'content',
++  React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
++    <p
++      ref={ref}
++      className="mb-0"
++    >
++      {stripPTags(value)}
++    </p>
++  )),
++);
++
++const BlogReadMore = getItemElementRenderer(
++  'system.codename',
++    React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++      <a
++        ref={ref}
++        className="mb-0"
++        href={'/blog?name='+ value}
++      >
++        READ MORE
++      </a>
++    )),
++  );
++
++export const BlogsBlogSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) => {
++  return (
++    <div
++      className="item"
++    >
++      <div className="article">
++        <div className="article-info">
++          <BlogTitle
++            data={data}
++          />
++          <BlogContent
++            data={data}
++          />
++          <BlogReadMore
++            data={data}
++          />
++        </div>
++      </div>
++    </div>
++  );
++};
++
++BlogsBlogSectionItem.displayName = 'BlogsBlogSectionItem';
++BlogsBlogSectionItem.propTypes = propTypes;
+diff --git a/components/sections/topic/TopicList.tsx b/components/sections/topic/TopicList.tsx
+index fbe1689..3a28b76 100644
+--- a/components/sections/topic/TopicList.tsx
++++ b/components/sections/topic/TopicList.tsx
+@@ -8,6 +8,8 @@ import {
+   Title,
+ } from '../../sectionIntroductionRenderers';
+ import { TopicListItem } from './TopicListItem';
++import { ArticleList } from '../article/ArticleList';
++import { ArticleListItem } from '../article/ArticleListItem';
+ 
+ 
+ 
+@@ -67,9 +69,8 @@ export interface ITopicListStateProps {
+                       key={topic.system.id}
+                       data={topic}
+                     />
+-                  ))}
++                  ))}                 
+                 </div>
+-              
+             </div>
+           </div>
+           
+diff --git a/components/sections/topic/TopicListItem.tsx b/components/sections/topic/TopicListItem.tsx
+index 6a0a7d4..077ffd2 100644
+--- a/components/sections/topic/TopicListItem.tsx
++++ b/components/sections/topic/TopicListItem.tsx
+@@ -1,8 +1,9 @@
+-import { ContentItem } from 'kentico-cloud-delivery';
++import { ContentItem, DeliveryClient } from 'kentico-cloud-delivery';
+ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { getProjectApiKey } from '../../../pages/topics'
+ 
+ 
+ export interface ITopicListItemStateProps {
+@@ -19,8 +20,6 @@ const propTypes: ValidationMap<ITopicListItemProps> = {
+   data: PropTypes.any.isRequired,
+ };
+ 
+-
+-
+ const TopicTitle = getItemElementRenderer(
+   'name',
+   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+@@ -30,6 +29,14 @@ const TopicTitle = getItemElementRenderer(
+   )),
+ );
+ 
++const RelatedPosts = getItemElementRenderer(
++  'related_posts',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({value}, ref) =>(
++    <h4>
++      {value}
++    </h4>
++  )),
++);
+ 
+ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+   return (
+@@ -40,7 +47,10 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+         <div className="topic-info">
+           <TopicTitle
+             data={data}
+-          />          
++          /> 
++          <RelatedPosts
++            data={data}
++          />       
+         </div>
+       </div>
+       <br/>
+diff --git a/pages/blog.tsx b/pages/blog.tsx
+index e3e69ea..4bcb8a6 100644
+--- a/pages/blog.tsx
++++ b/pages/blog.tsx
+@@ -13,7 +13,6 @@ import { Layout } from '../components/layout/layout';
+ import { PreLoader } from '../components/PreLoader';
+ import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
+ import { ArticleSection } from '../components/sections/article/ArticleSection';
+-import { ArticleList } from '../components/sections/article/ArticleList';
+ import { FooterSection } from '../components/sections/footer/FooterSection';
+ import { ServiceSection } from '../components/sections/service/ServiceSection';
+ import {
+@@ -25,7 +24,9 @@ import { ContentItemElementContext } from '../components/context/ContentItemElem
+ import fetch from 'cross-fetch';
+ import { getProjectIdFromQuery } from '../utilities/utils';
+ import { getBlogCodenameFromQuery } from '../utilities/utils';
+-import { BlogSection } from '../components/sections/blog/BlogSection';
++import { BlogDetail} from '../components/sections/blog/BlogDetail'
++import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
++import { BlogList } from '../components/sections/blog/BlogList';
+ 
+ 
+ type Content = {
+@@ -48,8 +49,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
+   'section_about_us': AboutUsSection,
+   'section_hero_unit': Header,
+   'section_highlighted_features': ServiceSection,
+-  'section_blog': ArticleSection,
+-  'section_blog_list': BlogSection
++  'section_blog': BlogsBlogSection,
++  'section_blog_list': BlogDetail
+ };
+ 
+ const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
+@@ -142,7 +143,6 @@ const Articles: NextFC<ArticlesProps> = ({
+       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
+     });
+     const { debug: forget1, ...content } = await client.item('blogs').withParameter('depth', '10').getPromise();
+-    const { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise(); // get all blogs
+     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+       return {
+         ...map,
+@@ -155,15 +155,15 @@ const Articles: NextFC<ArticlesProps> = ({
+     const blogCarousel = sections.find((section: ContentItem) => section.system.type === 'section_blog');
+     const blogList = sections.find((section: ContentItem) => section.system.type === 'section_blog_list');
+ 
+-    console.log(sections);
++    if (blogList) {      
++      var { items } = await client.items().type('blog_post').equalsFilter('system.codename', getBlogCodenameFromQuery(query)).getPromise();
++        blogList.article = items; 
++    }
+ 
+     if (blogCarousel) {      
++      var { items } = await client.items().type('blog_post').getPromise();
+       blogCarousel.article = items;
+     }
+-
+-    if (blogList) {      
+-        blogList.blogPosts = items; 
+-    }
+   
+     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
+     const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
+diff --git a/pages/blogs.tsx b/pages/blogs.tsx
+index 046468b..7ae0360 100644
+--- a/pages/blogs.tsx
++++ b/pages/blogs.tsx
+@@ -13,7 +13,7 @@ import { Layout } from '../components/layout/layout';
+ import { PreLoader } from '../components/PreLoader';
+ import { AboutUsSection } from '../components/sections/aboutUs/AboutUsSection';
+ import { ArticleSection } from '../components/sections/article/ArticleSection';
+-import { ArticleList } from '../components/sections/article/ArticleList';
++import { BlogList } from '../components/sections/blog/BlogList';
+ import { FooterSection } from '../components/sections/footer/FooterSection';
+ import { ServiceSection } from '../components/sections/service/ServiceSection';
+ import {
+@@ -24,7 +24,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
+ import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
+ import fetch from 'cross-fetch';
+ import { getProjectIdFromQuery } from '../utilities/utils';
+-import { BlogSection } from '../components/sections/blog/BlogSection';
++import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
+ 
+ 
+ type Content = {
+@@ -47,8 +47,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
+   'section_about_us': AboutUsSection,
+   'section_hero_unit': Header,
+   'section_highlighted_features': ServiceSection,
+-  'section_blog': ArticleSection,
+-  'section_blog_list': BlogSection
++  'section_blog': BlogsBlogSection,
++  'section_blog_list': BlogList
+ };
+ 
+ const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
+@@ -161,7 +161,7 @@ const Articles: NextFC<ArticlesProps> = ({
+     }
+ 
+     if (blogList) {      
+-        blogList.blogPosts = items; 
++        blogList.article = items; 
+     }
+   
+     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index 3668f48..af61de0 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -48,11 +48,11 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
+   'section_hero_unit': Header,
+   'section_highlighted_features': ServiceSection,
+   'section_articles': ArticleSection,
+-//   'section_article_list': ArticleList,
++  'section_article_list': ArticleList,
+   'section_topic_list': TopicList
+ };
+ 
+-const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
++export const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
+   console.log('hostname:', hostname);
+   return (await (await fetch(`http${hostname.includes('localhost') ? '' : 's'}://${hostname}/api-key/${projectId}`)).json()).key;
+ };
+@@ -144,6 +144,7 @@ const Topics: NextFC<TopicsProps> = ({
+     const { debug: forget1, ...content } = await client.item('all_topics').withParameter('depth', '10').getPromise();
+     const { debug: forget2, ...navigation } = await client.item('website_navigation').withParameter('depth', '10').getPromise();
+     const { debug: forget3, ...brandDetails } = await client.item('brand_details').withParameter('depth', '10').getPromise();
++    //const { debug: forget4, ...nestedContent } = await client.items().inFilter("system.type", ["article", "blog"]).getPromise();
+ 
+     
+     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+@@ -152,19 +153,25 @@ const Topics: NextFC<TopicsProps> = ({
+         [contentItem.system.codename]: contentItem,
+       };
+     }, {} as ItemMap);
++
++    // const nestedLinkedItemsByCodename = nestedContent.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
++    //   return {
++    //     ...map,
++    //     [contentItem.system.codename]: contentItem,
++    //   };
++    // }, {} as ItemMap);
+   
+     const sections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => linkedItemsByCodename[codename]);
+-   
++    //const nestedSections: ReadonlyArray<ContentItem> = content.item.sections.linkedItemCodenames.map((codename: string) => nestedLinkedItemsByCodename[codename]);
++
+     const articleSection = sections.find((section: ContentItem) => section.system.type === 'section_articles');
+     const articleList = sections.find((section: ContentItem) => section.system.type === 'section_article_list');
+-    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list');
+-
+-    
++    const topicList = sections.find((section: ContentItem) => section.system.type === 'section_topic_list'); 
+     
+-
+     if (topicList) {  
+-        var { items } = await client.items().type('topic').getPromise(); // get all topics    
++        var { items } = await client.items().type('topic').getPromise(); // get all topics  
+        topicList.topic = items;
++       //topicList.article = items;
+     }
+ 
+     if (articleSection) {  // top 3 articles    
+@@ -173,8 +180,8 @@ const Topics: NextFC<TopicsProps> = ({
+     }
+ 
+     if (articleList) { 
+-        var { items } = await client.items().type('article').getPromise(); // get all articles     
+-        articleList.article = await client.items().type('article').getPromise(); 
++        const { ...items } = await client.item('car').getPromise(); // get all articles     
++        articleList.article = items.linkedItems; 
+     }
+   
+ 
+-- 
+2.19.1.windows.1
+

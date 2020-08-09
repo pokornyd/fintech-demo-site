@@ -1,0 +1,1029 @@
+From b7af9d4d85166f2c49dd10c0e5b9e7fc41908fe9 Mon Sep 17 00:00:00 2001
+From: Daniel Pokorny <danielp@kentico.com>
+Date: Tue, 28 Apr 2020 20:52:04 +0200
+Subject: [PATCH 13/14] Added support for specifying project through
+ 'projectid' querystring
+
+---
+ components/navbar/NavBar.tsx                       |  8 +++++---
+ .../navbar/navigationMenu/NavigationMenu.tsx       | 10 ++++++----
+ components/sections/article/ArticleList.tsx        |  4 +++-
+ components/sections/article/ArticleListItem.tsx    | 11 +++++++----
+ components/sections/article/ArticleSection.tsx     |  4 +++-
+ components/sections/article/ArticleSectionItem.tsx | 10 ++++++----
+ components/sections/auxiliarytypes.d.ts            | 12 ++++++++++++
+ components/sections/blog/BlogCarouselItem.tsx      | 11 +++++++----
+ components/sections/blog/BlogList.tsx              |  4 +++-
+ components/sections/blog/BlogListItem.tsx          | 14 +++++++++-----
+ components/sections/blog/BlogSection.tsx           |  4 +++-
+ components/sections/blog/BlogSectionItem.tsx       |  2 ++
+ components/sections/blog/BlogsBlogSection.tsx      |  4 +++-
+ components/sections/blog/BlogsBlogSectionItem.tsx  | 14 +++++++++-----
+ components/sections/topic/TopicList.tsx            |  4 +++-
+ components/sections/topic/TopicListItem.tsx        | 11 ++++++-----
+ package.json                                       |  3 +++
+ pages/article.tsx                                  |  6 ++++++
+ pages/articles.tsx                                 |  6 ++++++
+ pages/blog.tsx                                     |  6 ++++++
+ pages/blogs.tsx                                    |  6 ++++++
+ pages/index.tsx                                    |  7 ++++++-
+ pages/topics.tsx                                   |  6 ++++++
+ utilities/utils.ts                                 |  9 ++++++++-
+ 24 files changed, 134 insertions(+), 42 deletions(-)
+
+diff --git a/components/navbar/NavBar.tsx b/components/navbar/NavBar.tsx
+index 912b16e..7cdbfd3 100644
+--- a/components/navbar/NavBar.tsx
++++ b/components/navbar/NavBar.tsx
+@@ -9,11 +9,13 @@ import {
+ } from '../Search';
+ import { NavBarLogo } from '../SVGs/NavBarLogo';
+ import { NavigationMenu } from './navigationMenu/NavigationMenu';
++import { IAssetElementValue } from '../sections/auxiliarytypes';
+ 
+ 
+ export interface INavBarStateProps {
+   readonly brandDetails: ContentItem;
+   readonly navigation: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface INavBarDispatchProps {
+@@ -70,10 +72,9 @@ export class NavBar extends React.PureComponent<INavBarProps, INavBarState> {
+       isSticky: scTop > 400,
+     }));
+   };
+-
++  
+   render() {
+-    const { navigation, brandDetails } = this.props;
+-
++    const { navigation, brandDetails, query } = this.props;
+     return (
+       <header
+         className={classNames('navbar-sticky navbar-transparent navbar-primary', {
+@@ -88,6 +89,7 @@ export class NavBar extends React.PureComponent<INavBarProps, INavBarState> {
+               data={brandDetails}
+             />
+             <NavigationMenu
++              query={query}
+               navigation={navigation}
+             />
+             <div className="navbar-nav">
+diff --git a/components/navbar/navigationMenu/NavigationMenu.tsx b/components/navbar/navigationMenu/NavigationMenu.tsx
+index ed6f1dd..d9c3949 100644
+--- a/components/navbar/navigationMenu/NavigationMenu.tsx
++++ b/components/navbar/navigationMenu/NavigationMenu.tsx
+@@ -1,14 +1,16 @@
+ import classNames from 'classnames';
+ import { ContentItem } from 'kentico-cloud-delivery';
+-import { NextFC } from 'next';
++import { NextFC, NextContext } from 'next';
+ import Link from 'next/link';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { getItemElementRenderer } from '../../ItemElementValue';
+-
++import { addPersistentProjId } from '../../../utilities/utils';
++import { IElementStringValue } from '../../sections/auxiliarytypes';
+ 
+ export interface INavigationMenuStateProps {
+   readonly navigation: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface INavigationMenuDispatchProps {
+@@ -47,7 +49,7 @@ const NavMenuLink = getItemElementRenderer(
+   )),
+ );
+ 
+-export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation }) => {
++export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation, query }) => {
+   return (
+     <>
+       <button
+@@ -71,7 +73,7 @@ export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation }) =>
+               key={navigationItem.system.id}
+               data={navigationItem}
+               subItems={navigationItem.sub_items}
+-              url={navigationItem.url.value}
++              url={navigationItem.url.value + addPersistentProjId(query)}              
+             />
+           ))}
+         </ul>
+diff --git a/components/sections/article/ArticleList.tsx b/components/sections/article/ArticleList.tsx
+index fdfde75..e12f5f9 100644
+--- a/components/sections/article/ArticleList.tsx
++++ b/components/sections/article/ArticleList.tsx
+@@ -11,6 +11,7 @@ import { ArticleListItem } from './ArticleListItem';
+ 
+ export interface IArticleListStateProps {
+     readonly data: ContentItem;
++    readonly query: Record<string, string | string[] | undefined>;
+   }
+   
+   export interface IArticleListDispatchProps {
+@@ -36,7 +37,7 @@ export interface IArticleListStateProps {
+     }
+   
+     render() {
+-      const { data } = this.props;
++      const { data, query } = this.props;
+       return (
+         <section className="article-list" >
+           <div className="container">
+@@ -59,6 +60,7 @@ export interface IArticleListStateProps {
+               <div className="col-md-12">
+                   {data.article.map((article: ContentItem) => (
+                     <ArticleListItem
++                      query={query}
+                       key={article.system.id}
+                       data={article}
+                     />
+diff --git a/components/sections/article/ArticleListItem.tsx b/components/sections/article/ArticleListItem.tsx
+index b7d0591..2493c91 100644
+--- a/components/sections/article/ArticleListItem.tsx
++++ b/components/sections/article/ArticleListItem.tsx
+@@ -2,12 +2,14 @@ import { ContentItem } from 'kentico-cloud-delivery';
+ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+-import { stripPTags } from '../../../utilities/utils';
++import { stripPTags, addDetailQueryString, addPersistentProjId } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValue, IElementStringValueWithQuery } from '../auxiliarytypes';
+ 
+ 
+ export interface IArticleListItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IArticleListItemDispatchProps {
+@@ -45,18 +47,18 @@ const ArticleContent = getItemElementRenderer(
+ 
+ const ArticleReadMore = getItemElementRenderer(
+ 'system.codename',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+     <a
+       ref={ref}
+       className="mb-0"
+-      href={'/article?name='+ value}
++      href={'/article'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+     >
+       READ MORE
+     </a>
+   )),
+ );
+ 
+-export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
++export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data, query }) => {
+   return (
+     <div className="item">
+       <div className="article">
+@@ -69,6 +71,7 @@ export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
+           />
+           <ArticleReadMore
+             data={data}
++            query={query}
+           />
+         </div>
+       </div>
+diff --git a/components/sections/article/ArticleSection.tsx b/components/sections/article/ArticleSection.tsx
+index b53054d..1fd9e6c 100644
+--- a/components/sections/article/ArticleSection.tsx
++++ b/components/sections/article/ArticleSection.tsx
+@@ -12,6 +12,7 @@ import { ArticleSectionItem } from './ArticleSectionItem';
+ 
+ export interface IArticleSectionStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IArticleSectionDispatchProps {
+@@ -37,7 +38,7 @@ export class ArticleSection extends React.PureComponent<IArticleSectionProps> {
+   }
+ 
+   render() {
+-    const { data } = this.props;
++    const { data, query } = this.props;
+     return (
+       <section className="article">
+         <div className="container">
+@@ -70,6 +71,7 @@ export class ArticleSection extends React.PureComponent<IArticleSectionProps> {
+               >
+                 {data.article.map((article: ContentItem) => (
+                   <ArticleSectionItem
++                    query={query}
+                     key={article.system.id}
+                     data={article}
+                   />
+diff --git a/components/sections/article/ArticleSectionItem.tsx b/components/sections/article/ArticleSectionItem.tsx
+index cfe8e7d..0ca6408 100644
+--- a/components/sections/article/ArticleSectionItem.tsx
++++ b/components/sections/article/ArticleSectionItem.tsx
+@@ -2,12 +2,13 @@ import { ContentItem } from 'kentico-cloud-delivery';
+ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+-import { stripPTags } from '../../../utilities/utils';
++import { stripPTags, addDetailQueryString, addPersistentProjId } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
+ 
+ 
+ export interface IArticleSectionItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IArticleSectionItemDispatchProps {
+@@ -45,18 +46,18 @@ const ArticleContent = getItemElementRenderer(
+ 
+ const ArticleReadMore = getItemElementRenderer(
+   'system.codename',
+-    React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+       <a
+         ref={ref}
+         className="mb-0"
+-        href={'/article?name='+ value}
++        href={'/article'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+       >
+         READ MORE
+       </a>
+     )),
+   );
+ 
+-export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) => {
++export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data, query }) => {
+   return (
+     <div className="item">
+       <div className="article">
+@@ -68,6 +69,7 @@ export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) =
+             data={data}
+           />
+           <ArticleReadMore
++            query={query}
+             data={data}
+           />
+         </div>
+diff --git a/components/sections/auxiliarytypes.d.ts b/components/sections/auxiliarytypes.d.ts
+index 568764c..bc3b602 100644
+--- a/components/sections/auxiliarytypes.d.ts
++++ b/components/sections/auxiliarytypes.d.ts
+@@ -1,3 +1,4 @@
++import { ContentItem } from "kentico-cloud-delivery";
+ 
+ interface IAssetElementValue {
+   readonly value: ReadonlyArray<{
+@@ -9,3 +10,14 @@ interface IAssetElementValue {
+ interface IElementStringValue {
+   readonly value: string;
+ }
++
++interface IElementStringValueWithQuery {
++  readonly value: string;
++  readonly query: Record<string, string | string[] | undefined>;
++}
++
++interface IElementStringValueWithQueryAndData {
++  readonly value: string;
++  readonly query: Record<string, string | string[] | undefined>;
++  readonly data: ContentItem;
++}
+diff --git a/components/sections/blog/BlogCarouselItem.tsx b/components/sections/blog/BlogCarouselItem.tsx
+index 0aa8908..c773e3d 100644
+--- a/components/sections/blog/BlogCarouselItem.tsx
++++ b/components/sections/blog/BlogCarouselItem.tsx
+@@ -3,12 +3,14 @@ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { printFuzzyDate } from '../../../utilities/timeUtils';
+-import { stripPTags } from '../../../utilities/utils';
++import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValueWithQuery, IElementStringValue } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogCarouselItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogCarouselItemDispatchProps {
+@@ -65,11 +67,11 @@ const PostPublishDate = getItemElementRenderer(
+ 
+ const PostTitle = getItemElementRenderer(
+   'title',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+     <a
+       ref={ref}
+       className="post-title"
+-      href="#!"
++      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+     >
+       {value}
+     </a>
+@@ -88,7 +90,7 @@ const PostLeadParagraph = getItemElementRenderer(
+   )),
+ );
+ 
+-export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data }) => {
++export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data, query }) => {
+   const { author: { 0: author } } = data;
+   return (
+     <div
+@@ -109,6 +111,7 @@ export const BlogCarouselItem: NextFC<IBlogCarouselItemProps> = ({ data }) => {
+             data={data}
+           />
+           <PostTitle
++            query={query}
+             data={data}
+           />
+           <PostLeadParagraph
+diff --git a/components/sections/blog/BlogList.tsx b/components/sections/blog/BlogList.tsx
+index cbe6d03..779b8bb 100644
+--- a/components/sections/blog/BlogList.tsx
++++ b/components/sections/blog/BlogList.tsx
+@@ -11,6 +11,7 @@ import { BlogListItem } from './BlogListItem';
+ 
+ export interface IBlogListStateProps {
+     readonly data: ContentItem;
++    readonly query: Record<string, string | string[] | undefined>;
+   }
+   
+   export interface IBlogListDispatchProps {
+@@ -36,7 +37,7 @@ export interface IBlogListStateProps {
+     }
+   
+     render() {
+-      const { data } = this.props;
++      const { data, query } = this.props;
+       return (
+         <section className="article-list" >
+           <div className="container">
+@@ -61,6 +62,7 @@ export interface IBlogListStateProps {
+ 
+                   {data.article.map((article: ContentItem) => (
+                     <BlogListItem
++                      query={query}
+                       key={article.system.id}
+                       data={article}
+                     />
+diff --git a/components/sections/blog/BlogListItem.tsx b/components/sections/blog/BlogListItem.tsx
+index 22d8a24..d393b10 100644
+--- a/components/sections/blog/BlogListItem.tsx
++++ b/components/sections/blog/BlogListItem.tsx
+@@ -2,12 +2,14 @@ import { ContentItem } from 'kentico-cloud-delivery';
+ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+-import { stripPTags } from '../../../utilities/utils';
++import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValue, IElementStringValueWithQuery } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogListItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogListItemDispatchProps {
+@@ -31,6 +33,7 @@ const BlogTitle = getItemElementRenderer(
+   )),
+ );
+ 
++const MAX_CHAR = 200;
+ const BlogContent = getItemElementRenderer(
+   'content',
+   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+@@ -38,25 +41,25 @@ const BlogContent = getItemElementRenderer(
+       ref={ref}
+       className="mb-0"
+     >
+-      {stripPTags(value)}
++      {stripPTags(value).substring(0,MAX_CHAR) + "..."}
+     </p>
+   )),
+ );
+ 
+ const BlogReadMore = getItemElementRenderer(
+ 'system.codename',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++  React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+     <a
+       ref={ref}
+       className="mb-0"
+-      href={'/blog?name='+ value}
++      href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+     >
+       READ MORE
+     </a>
+   )),
+ );
+ 
+-export const BlogListItem: NextFC<IBlogListItemProps> = ({ data }) => {
++export const BlogListItem: NextFC<IBlogListItemProps> = ({ data, query }) => {
+   return (
+     <div
+       className="item"
+@@ -70,6 +73,7 @@ export const BlogListItem: NextFC<IBlogListItemProps> = ({ data }) => {
+             data={data}
+           />
+           <BlogReadMore
++            query={query}
+             data={data}
+           />
+         </div>
+diff --git a/components/sections/blog/BlogSection.tsx b/components/sections/blog/BlogSection.tsx
+index a4674e1..e3d693a 100644
+--- a/components/sections/blog/BlogSection.tsx
++++ b/components/sections/blog/BlogSection.tsx
+@@ -12,6 +12,7 @@ import { BlogCarouselItem } from './BlogCarouselItem';
+ 
+ export interface IBlogSectionStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogSectionDispatchProps {
+@@ -37,7 +38,7 @@ export class BlogSection extends React.PureComponent<IBlogSectionProps> {
+   }
+ 
+   render() {
+-    const { data } = this.props;
++    const { data, query } = this.props;
+     return (
+       <section className="blog">
+         <div className="container">
+@@ -72,6 +73,7 @@ export class BlogSection extends React.PureComponent<IBlogSectionProps> {
+                   <BlogCarouselItem
+                     key={blogPost.system.id}
+                     data={blogPost}
++                    query={query}
+                   />
+                 ))}
+               </div>
+diff --git a/components/sections/blog/BlogSectionItem.tsx b/components/sections/blog/BlogSectionItem.tsx
+index ce6d065..b0624ef 100644
+--- a/components/sections/blog/BlogSectionItem.tsx
++++ b/components/sections/blog/BlogSectionItem.tsx
+@@ -4,10 +4,12 @@ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { stripPTags } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValue } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogSectionItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogSectionItemDispatchProps {
+diff --git a/components/sections/blog/BlogsBlogSection.tsx b/components/sections/blog/BlogsBlogSection.tsx
+index 4ee423d..2aa26df 100644
+--- a/components/sections/blog/BlogsBlogSection.tsx
++++ b/components/sections/blog/BlogsBlogSection.tsx
+@@ -12,6 +12,7 @@ import { BlogsBlogSectionItem } from './BlogsBlogSectionItem';
+ 
+ export interface IBlogsBlogSectionStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogsBlogSectionDispatchProps {
+@@ -37,7 +38,7 @@ export class BlogsBlogSection extends React.PureComponent<IBlogsBlogSectionProps
+   }
+ 
+   render() {
+-    const { data } = this.props;
++    const { data, query } = this.props;
+     return (
+       <section className="article">
+         <div className="container">
+@@ -70,6 +71,7 @@ export class BlogsBlogSection extends React.PureComponent<IBlogsBlogSectionProps
+               >
+                 {data.article.map((article: ContentItem) => (
+                   <BlogsBlogSectionItem
++                    query={query}
+                     key={article.system.id}
+                     data={article}
+                   />
+diff --git a/components/sections/blog/BlogsBlogSectionItem.tsx b/components/sections/blog/BlogsBlogSectionItem.tsx
+index 38c6c17..2d21ac6 100644
+--- a/components/sections/blog/BlogsBlogSectionItem.tsx
++++ b/components/sections/blog/BlogsBlogSectionItem.tsx
+@@ -2,12 +2,14 @@ import { ContentItem } from 'kentico-cloud-delivery';
+ import { NextFC } from 'next';
+ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+-import { stripPTags } from '../../../utilities/utils';
++import { stripPTags, addPersistentProjId, addDetailQueryString } from '../../../utilities/utils';
+ import { getItemElementRenderer } from '../../ItemElementValue';
++import { IElementStringValueWithQuery, IElementStringValue } from '../auxiliarytypes';
+ 
+ 
+ export interface IBlogsBlogSectionItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface IBlogsBlogSectionItemDispatchProps {
+@@ -31,6 +33,7 @@ const BlogTitle = getItemElementRenderer(
+   )),
+ );
+ 
++const MaxChar = 200;
+ const BlogContent = getItemElementRenderer(
+   'content',
+   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+@@ -38,25 +41,25 @@ const BlogContent = getItemElementRenderer(
+       ref={ref}
+       className="mb-0"
+     >
+-      {stripPTags(value)}
++      {stripPTags(value).substring(0, MaxChar)+"..."}
+     </p>
+   )),
+ );
+ 
+ const BlogReadMore = getItemElementRenderer(
+   'system.codename',
+-    React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    React.forwardRef<HTMLAnchorElement, IElementStringValueWithQuery>(({ value, query }, ref) => (
+       <a
+         ref={ref}
+         className="mb-0"
+-        href={'/blog?name='+ value}
++        href={'/blog'+ addPersistentProjId(query) + addDetailQueryString(query) + value}
+       >
+         READ MORE
+       </a>
+     )),
+   );
+ 
+-export const BlogsBlogSectionItem: NextFC<IBlogsBlogSectionItemProps> = ({ data }) => {
++export const BlogsBlogSectionItem: NextFC<IBlogsBlogSectionItemProps> = ({ data, query }) => {
+   return (
+     <div
+       className="item"
+@@ -70,6 +73,7 @@ export const BlogsBlogSectionItem: NextFC<IBlogsBlogSectionItemProps> = ({ data
+             data={data}
+           />
+           <BlogReadMore
++            query={query}
+             data={data}
+           />
+         </div>
+diff --git a/components/sections/topic/TopicList.tsx b/components/sections/topic/TopicList.tsx
+index d3b8180..15c1c57 100644
+--- a/components/sections/topic/TopicList.tsx
++++ b/components/sections/topic/TopicList.tsx
+@@ -14,6 +14,7 @@ import { TopicListItem } from './TopicListItem';
+ 
+ export interface ITopicListStateProps {
+     readonly data: ContentItem;
++    readonly query: Record<string, string | string[] | undefined>;
+   }
+   
+   export interface ITopicListDispatchProps {
+@@ -40,7 +41,7 @@ export interface ITopicListStateProps {
+     }
+   
+     render() {
+-      const { data } = this.props;
++      const { data, query } = this.props;
+       return (
+         <section className="topic-list" >
+           <div className="container">
+@@ -65,6 +66,7 @@ export interface ITopicListStateProps {
+ 
+                   {data.topic.map((topic: ContentItem) => (
+                     <TopicListItem
++                      query={query}
+                       key={topic.system.id}
+                       data={topic}
+                     />
+diff --git a/components/sections/topic/TopicListItem.tsx b/components/sections/topic/TopicListItem.tsx
+index 3d1d059..b8a4a6a 100644
+--- a/components/sections/topic/TopicListItem.tsx
++++ b/components/sections/topic/TopicListItem.tsx
+@@ -6,11 +6,13 @@ import { getItemElementRenderer } from '../../ItemElementValue';
+ import { getProjectApiKey } from '../../../pages/topics'
+ import { ArticleListItem} from '../article/ArticleListItem';
+ import { BlogListItem} from '../blog/BlogListItem';
++import { IElementStringValue } from '../auxiliarytypes';
+ 
+ 
+ 
+ export interface ITopicListItemStateProps {
+   readonly data: ContentItem;
++  readonly query: Record<string, string | string[] | undefined>;
+ }
+ 
+ export interface ITopicListItemDispatchProps {
+@@ -26,19 +28,16 @@ const propTypes: ValidationMap<ITopicListItemProps> = {
+ const TopicTitle = getItemElementRenderer(
+   'name',
+   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <div className='row'>
++    <div className='pb-5'>
+       <h2>
+         {value}
+       </h2>
+-      <br/>
+-      <br/>
+-      <br/>
+     </div>
+   )),
+ );
+ 
+ 
+-export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
++export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, query }) => {
+   return (
+     <div
+       className="item"
+@@ -52,6 +51,7 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+           {data.related_posts.filter((article: ContentItem) => article.system.type == 'article').map((article: ContentItem) => ( 
+                     
+                     <ArticleListItem
++                      query={query}
+                       key={article.system.id}
+                       data={article}
+                     />
+@@ -60,6 +60,7 @@ export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
+           {data.related_posts.filter((blog: ContentItem) => blog.system.type == 'blog_post').map((blog: ContentItem) => ( 
+                     
+                     <BlogListItem
++                      query={query}
+                       key={blog.system.id}
+                       data={blog}
+                     />
+diff --git a/package.json b/package.json
+index 1d28367..63fd97d 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,9 @@
+ {
+ 	"name": "fintech-demo-site",
+ 	"version": "1.0.0",
++	"engines": {
++		"node": "10.16.x"
++	},
+ 	"description": "",
+ 	"main": "index.js",
+ 	"scripts": {
+diff --git a/pages/article.tsx b/pages/article.tsx
+index afb0fff..f424de9 100644
+--- a/pages/article.tsx
++++ b/pages/article.tsx
+@@ -33,6 +33,7 @@ type Content = {
+ };
+ 
+ type ArticlesProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -66,6 +67,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Articles: NextFC<ArticlesProps> = ({
++    queryObj,
+     brandDetails,
+     content,
+     isPreview,
+@@ -99,6 +101,7 @@ const Articles: NextFC<ArticlesProps> = ({
+           <PreLoader />
+   
+           <NavBar
++            query={queryObj}
+             navigation={navigation.item}
+             brandDetails={brandDetails.item}
+           />
+@@ -115,6 +118,7 @@ const Articles: NextFC<ArticlesProps> = ({
+                 const Component = getRenderComponentForSection(section.system.type);
+                 return (
+                   <Component
++                    query={queryObj}
+                     key={section.system.id}
+                     data={section}
+                   />
+@@ -132,6 +136,7 @@ const Articles: NextFC<ArticlesProps> = ({
+   };
+   
+   Articles.getInitialProps = async ({ query, req }) => {
++    const queryObj = query;
+     const hostname = req ? req.headers.host : location.hostname;
+     const isPreview = Object.hasOwnProperty.call(query, 'preview');
+     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -183,6 +188,7 @@ const Articles: NextFC<ArticlesProps> = ({
+       projectId,
+       removeScrollbar,
+       sections,
++      queryObj,
+     };
+   };
+   
+diff --git a/pages/articles.tsx b/pages/articles.tsx
+index a7d9403..d875c5a 100644
+--- a/pages/articles.tsx
++++ b/pages/articles.tsx
+@@ -32,6 +32,7 @@ type Content = {
+ };
+ 
+ type ArticlesProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -64,6 +65,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Articles: NextFC<ArticlesProps> = ({
++    queryObj,
+     brandDetails,
+     content,
+     isPreview,
+@@ -97,6 +99,7 @@ const Articles: NextFC<ArticlesProps> = ({
+           <PreLoader />
+   
+           <NavBar
++            query={queryObj}
+             navigation={navigation.item}
+             brandDetails={brandDetails.item}
+           />
+@@ -115,6 +118,7 @@ const Articles: NextFC<ArticlesProps> = ({
+                   <Component
+                     key={section.system.id}
+                     data={section}
++                    query={queryObj}
+                   />
+                 );
+               })
+@@ -130,6 +134,7 @@ const Articles: NextFC<ArticlesProps> = ({
+   };
+   
+   Articles.getInitialProps = async ({ query, req }) => {
++    const queryObj = query;
+     const hostname = req ? req.headers.host : location.hostname;
+     const isPreview = Object.hasOwnProperty.call(query, 'preview');
+     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -173,6 +178,7 @@ const Articles: NextFC<ArticlesProps> = ({
+       projectId,
+       removeScrollbar,
+       sections,
++      queryObj,
+     };
+   };
+   
+diff --git a/pages/blog.tsx b/pages/blog.tsx
+index c640cde..f26674e 100644
+--- a/pages/blog.tsx
++++ b/pages/blog.tsx
+@@ -33,6 +33,7 @@ type Content = {
+ };
+ 
+ type ArticlesProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -65,6 +66,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Articles: NextFC<ArticlesProps> = ({
++    queryObj,
+     brandDetails,
+     content,
+     isPreview,
+@@ -98,6 +100,7 @@ const Articles: NextFC<ArticlesProps> = ({
+           <PreLoader />
+   
+           <NavBar
++            query={queryObj}
+             navigation={navigation.item}
+             brandDetails={brandDetails.item}
+           />
+@@ -114,6 +117,7 @@ const Articles: NextFC<ArticlesProps> = ({
+                 const Component = getRenderComponentForSection(section.system.type);
+                 return (
+                   <Component
++                    query={queryObj}
+                     key={section.system.id}
+                     data={section}
+                   />
+@@ -131,6 +135,7 @@ const Articles: NextFC<ArticlesProps> = ({
+   };
+   
+   Articles.getInitialProps = async ({ query, req }) => {
++    const queryObj = query;
+     const hostname = req ? req.headers.host : location.hostname;
+     const isPreview = Object.hasOwnProperty.call(query, 'preview');
+     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -178,6 +183,7 @@ const Articles: NextFC<ArticlesProps> = ({
+       projectId,
+       removeScrollbar,
+       sections,
++      queryObj,
+     };
+   };
+   
+diff --git a/pages/blogs.tsx b/pages/blogs.tsx
+index 9e31ee7..f740f32 100644
+--- a/pages/blogs.tsx
++++ b/pages/blogs.tsx
+@@ -32,6 +32,7 @@ type Content = {
+ };
+ 
+ type ArticlesProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -64,6 +65,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Articles: NextFC<ArticlesProps> = ({
++    queryObj,
+     brandDetails,
+     content,
+     isPreview,
+@@ -97,6 +99,7 @@ const Articles: NextFC<ArticlesProps> = ({
+           <PreLoader />
+   
+           <NavBar
++            query={queryObj}
+             navigation={navigation.item}
+             brandDetails={brandDetails.item}
+           />
+@@ -115,6 +118,7 @@ const Articles: NextFC<ArticlesProps> = ({
+                   <Component
+                     key={section.system.id}
+                     data={section}
++                    query={queryObj}
+                   />
+                 );
+               })
+@@ -130,6 +134,7 @@ const Articles: NextFC<ArticlesProps> = ({
+   };
+   
+   Articles.getInitialProps = async ({ query, req }) => {
++    const queryObj = query;
+     const hostname = req ? req.headers.host : location.hostname;
+     const isPreview = Object.hasOwnProperty.call(query, 'preview');
+     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -174,6 +179,7 @@ const Articles: NextFC<ArticlesProps> = ({
+       projectId,
+       removeScrollbar,
+       sections,
++      queryObj,
+     };
+   };
+   
+diff --git a/pages/index.tsx b/pages/index.tsx
+index 8b56e83..32317bd 100644
+--- a/pages/index.tsx
++++ b/pages/index.tsx
+@@ -33,6 +33,7 @@ type Content = {
+ };
+ 
+ type IndexProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -66,6 +67,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Index: NextFC<IndexProps> = ({
++  queryObj,
+   brandDetails,
+   content,
+   isPreview,
+@@ -74,7 +76,6 @@ const Index: NextFC<IndexProps> = ({
+   removeScrollbar,
+   sections,
+ }) => {
+-
+   return (
+     <PreviewContext.Provider
+       value={{
+@@ -99,6 +100,7 @@ html,body{
+         <PreLoader />
+ 
+         <NavBar
++          query={queryObj}
+           navigation={navigation.item}
+           brandDetails={brandDetails.item}
+         />
+@@ -115,6 +117,7 @@ html,body{
+               const Component = getRenderComponentForSection(section.system.type);
+               return (
+                 <Component
++                  query={queryObj}
+                   key={section.system.id}
+                   data={section}
+                 />
+@@ -132,6 +135,7 @@ html,body{
+ };
+ 
+ Index.getInitialProps = async ({ query, req }) => {
++  const queryObj = query;
+   const hostname = req ? req.headers.host : location.hostname;
+   const isPreview = Object.hasOwnProperty.call(query, 'preview');
+   const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -168,6 +172,7 @@ Index.getInitialProps = async ({ query, req }) => {
+     projectId,
+     removeScrollbar,
+     sections,
++    queryObj,
+   };
+ };
+ 
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index d73d593..c3436c7 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -33,6 +33,7 @@ type Content = {
+ };
+ 
+ type TopicsProps = {
++  readonly queryObj: Record<string, string | string[] | undefined>;
+   readonly content: Content;
+   readonly navigation: Content;
+   readonly brandDetails: Content;
+@@ -66,6 +67,7 @@ const getRenderComponentForSection = (sectionType: string): (ComponentClass<any>
+ type ItemMap = { readonly [codename: string]: ContentItem };
+ 
+ const Topics: NextFC<TopicsProps> = ({
++    queryObj,
+     brandDetails,
+     content,
+     isPreview,
+@@ -99,6 +101,7 @@ const Topics: NextFC<TopicsProps> = ({
+           <PreLoader />
+   
+           <NavBar
++            query={queryObj}
+             navigation={navigation.item}
+             brandDetails={brandDetails.item}
+           />
+@@ -115,6 +118,7 @@ const Topics: NextFC<TopicsProps> = ({
+                 const Component = getRenderComponentForSection(section.system.type);
+                 return (
+                   <Component
++                    query={queryObj}
+                     key={section.system.id}
+                     data={section}
+                   />
+@@ -132,6 +136,7 @@ const Topics: NextFC<TopicsProps> = ({
+   };
+   
+   Topics.getInitialProps = async ({ query, req }) => {
++    const queryObj = query;
+     const hostname = req ? req.headers.host : location.hostname;
+     const isPreview = Object.hasOwnProperty.call(query, 'preview');
+     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+@@ -177,6 +182,7 @@ const Topics: NextFC<TopicsProps> = ({
+ 
+   
+     return {
++      queryObj,
+       brandDetails,
+       content: content as Content,
+       isPreview,
+diff --git a/utilities/utils.ts b/utilities/utils.ts
+index 85c9866..1e8e276 100644
+--- a/utilities/utils.ts
++++ b/utilities/utils.ts
+@@ -3,13 +3,20 @@ export const stripPTags = (html: string) => {
+ };
+ 
+ export const getProjectIdFromQuery = (query: Record<string, string | string[] | undefined>): string => {
+-  return (query.projectId || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
++  return (query.projectid || '56cd7899-b733-005e-5924-9d4523b0acb6') as string;
+ };
+ 
+ export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
+   return (query.name) as string;
+ };
+ 
++export const addPersistentProjId = (query: Record<string, string | string[] | undefined>): string => {
++  return query && query.projectid ? "?projectid=" + query.projectid : "";
++};
++
++export const addDetailQueryString = (query: Record<string, string | string[] | undefined>): string => {
++  return query && query.projectid ? "&name=" : "?name=";
++};
+ 
+ export const addClassToPTags = (html: string, className: string) => {
+   const replacement = `<p class="${className}">`;
+-- 
+2.19.1.windows.1
+

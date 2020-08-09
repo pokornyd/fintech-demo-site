@@ -24,6 +24,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
 import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
+import { RecommendationClient } from '@kentico/kontent-recommendations';
 
 
 type Content = {

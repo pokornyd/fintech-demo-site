@@ -25,6 +25,7 @@ import { ContentItemElementContext } from '../components/context/ContentItemElem
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
 import { getCodenameFromQuery } from '../utilities/utils';
+import { RecommendationClient } from '@kentico/kontent-recommendations';
 
 
 type Content = {
@@ -140,17 +141,24 @@ const Articles: NextFC<ArticlesProps> = ({
     const hostname = req ? req.headers.host : location.hostname;
     const isPreview = Object.hasOwnProperty.call(query, 'preview');
     const removeScrollbar = Object.hasOwnProperty.call(query, 'no-scrollbar');
+    const recommenderKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIwN2EwZTZlMi03NTIyLTAxNjgtNGFiZS05NmNhNTRlZTY4ZTMiLCJwaWQiOiIwN2EwZTZlMi03NTIyLTAxNjgtNGFiZS05NmNhNTRlZTY4ZTMiLCJqdGkiOiJwbzBtT2pNMXZTN0pacHdsIiwiaXNzIjoicmVjb21tZW5kLmtvbnRlbnQuYWkiLCJhdWQiOiJyZWNvbW1lbmQua29udGVudC5haSJ9.ENSEeEOWwwVa-iGye3XxPYwHqyLTfnTv0VRb1oqMmW8';
     const projectId = getProjectIdFromQuery(query);
     const client = new DeliveryClient({
       projectId,
       enablePreviewMode: isPreview,
       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
     });
+    const recommendationClient = new RecommendationClient({
+      projectId: projectId,
+      apiKey: recommenderKey
+      //baseUrl: 'https://recommend.kontent.ai/api/v2/'
+    });
     const { debug: forget1, ...content } = await client.item('articles').withParameter('depth', '10').getPromise();
 
     const codename = getCodenameFromQuery(query);
     
-    var { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise(); 
+    var { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise();
+    var recommendationConfig = JSON.parse(items[0].elements.recommendations.value); 
     
     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
       return {
@@ -169,10 +177,23 @@ const Articles: NextFC<ArticlesProps> = ({
         articleDetail.article = items;
         sections[index].title.value = items[0].elements.title.value;
         sections[index].description.value = "";
+        //sections[index].backdrop_image.value = items[0].elements.
+        sections[index].elements.backdrop_image.value[0] = items[0].elements.teaser_image.value[0];
     }
 
     if (articleSection) {
-      var { items } = await client.items().type('article').getPromise(); 
+      var { data } = await recommendationClient.recommendItems()
+        .withData({
+          currentItemCodename: recommendationConfig.itemCodename,
+          requestedTypeCodename: recommendationConfig.requestedType,
+          responseLimit: recommendationConfig.requestedCount,
+          visitId: 'z',
+          recommendationSettings: {
+            scenario: recommendationConfig.scenario
+          }
+        }).toPromise();
+
+      var { items } = await client.items().type('article').inFilter('system.codename', data.map(item => item.codename)).getPromise(); 
       articleSection.article = items;
     }
   

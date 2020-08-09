@@ -1,0 +1,26 @@
+From 01e3a0e639eecf1a52fec5257a42bc6715096b27 Mon Sep 17 00:00:00 2001
+From: Daniel Pokorny <52500882+pokornyd@users.noreply.github.com>
+Date: Mon, 27 Apr 2020 12:38:51 +0200
+Subject: [PATCH 12/14] Update package.json
+
+---
+ package.json | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/package.json b/package.json
+index 1d28367..63fd97d 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,9 @@
+ {
+ 	"name": "fintech-demo-site",
+ 	"version": "1.0.0",
++	"engines": {
++		"node": "10.16.x"
++	},
+ 	"description": "",
+ 	"main": "index.js",
+ 	"scripts": {
+-- 
+2.19.1.windows.1
+

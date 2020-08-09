@@ -1,0 +1,183 @@
+From d5b1429c67c38216204b36a7f1d92b701a55e67d Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Fri, 24 Apr 2020 11:40:19 +1000
+Subject: [PATCH 06/14] topics landing page v0.4 - added nested listings of ALL
+ blogs and ALL articles - todo: filter out only linked ones
+
+---
+ components/sections/topic/TopicList.tsx     | 11 ++++-
+ components/sections/topic/TopicListItem.tsx | 55 +++++++++++++++------
+ pages/topics.tsx                            |  7 ++-
+ 3 files changed, 55 insertions(+), 18 deletions(-)
+
+diff --git a/components/sections/topic/TopicList.tsx b/components/sections/topic/TopicList.tsx
+index 3a28b76..59e613e 100644
+--- a/components/sections/topic/TopicList.tsx
++++ b/components/sections/topic/TopicList.tsx
+@@ -8,13 +8,14 @@ import {
+   Title,
+ } from '../../sectionIntroductionRenderers';
+ import { TopicListItem } from './TopicListItem';
+-import { ArticleList } from '../article/ArticleList';
+-import { ArticleListItem } from '../article/ArticleListItem';
++
+ 
+ 
+ 
+ export interface ITopicListStateProps {
+     readonly data: ContentItem;
++    readonly dataArticles: ContentItem;
++    readonly dataBlogs: ContentItem;
+   }
+   
+   export interface ITopicListDispatchProps {
+@@ -25,6 +26,8 @@ export interface ITopicListStateProps {
+   
+   const propTypes: ValidationMap<ITopicListProps> = {
+     data: PropTypes.any.isRequired,
++    dataArticles: PropTypes.any.isRequired,
++    dataBlogs: PropTypes.any.isRequired,
+   };
+   
+   
+@@ -42,6 +45,8 @@ export interface ITopicListStateProps {
+   
+     render() {
+       const { data } = this.props;
++      const { dataArticles } = this.props;
++      const { dataBlogs} = this.props;
+       return (
+         <section className="topic-list" >
+           <div className="container">
+@@ -68,6 +73,8 @@ export interface ITopicListStateProps {
+                     <TopicListItem
+                       key={topic.system.id}
+                       data={topic}
++                      dataArticles={dataArticles}
++                      dataBlogs={dataBlogs}
+                     />
+                   ))}                 
+                 </div>
+diff --git a/components/sections/topic/TopicListItem.tsx b/components/sections/topic/TopicListItem.tsx
+index 077ffd2..9b78851 100644
+--- a/components/sections/topic/TopicListItem.tsx
++++ b/components/sections/topic/TopicListItem.tsx
+@@ -4,10 +4,15 @@ import PropTypes, { ValidationMap } from 'prop-types';
+ import React from 'react';
+ import { getItemElementRenderer } from '../../ItemElementValue';
+ import { getProjectApiKey } from '../../../pages/topics'
++import { ArticleListItem} from '../article/ArticleListItem';
++import { BlogListItem} from '../blog/BlogListItem';
++
+ 
+ 
+ export interface ITopicListItemStateProps {
+   readonly data: ContentItem;
++  readonly dataArticles: ContentItem;
++  readonly dataBlogs: ContentItem;
+ }
+ 
+ export interface ITopicListItemDispatchProps {
+@@ -18,39 +23,59 @@ interface ITopicListItemProps extends ITopicListItemStateProps, ITopicListItemDi
+ 
+ const propTypes: ValidationMap<ITopicListItemProps> = {
+   data: PropTypes.any.isRequired,
++  dataArticles: PropTypes.any.isRequired,
++  dataBlogs: PropTypes.any.isRequired,
+ };
+ 
+ const TopicTitle = getItemElementRenderer(
+   'name',
+   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <h3>
+-      {value}
+-    </h3>
++    <div className='row'>
++      <h2>
++        {value}
++      </h2>
++      <br/>
++      <br/>
++      <br/>
++    </div>
+   )),
+ );
+ 
+-const RelatedPosts = getItemElementRenderer(
+-  'related_posts',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({value}, ref) =>(
+-    <h4>
+-      {value}
+-    </h4>
+-  )),
+-);
++// const RelatedPosts = getItemElementRenderer(
++//   'related_posts',
++//   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({value}, ref) =>(
++//     <h4>
++//       {value}
++//     </h4>
++//   )),
++// );
++
+ 
+-export const TopicListItem: NextFC<ITopicListItemProps> = ({ data }) => {
++export const TopicListItem: NextFC<ITopicListItemProps> = ({ data, dataArticles, dataBlogs }) => {
+   return (
+     <div
+       className="item"
+     >
+       <div className="topic">
+         <div className="topic-info">
++          
+           <TopicTitle
+             data={data}
+           /> 
+-          <RelatedPosts
+-            data={data}
+-          />       
++         
++          {dataArticles.article.map((article: ContentItem) => ( //if contentItem is linked display, otherwise skip
++                    <ArticleListItem
++                      key={article.system.id}
++                      data={article}
++                    />
++                  ))}
++          {dataBlogs.blog.map((blog: ContentItem) => (
++                    <BlogListItem
++                      key={blog.system.id}
++                      data={blog}
++                    />
++                  ))}
++
+         </div>
+       </div>
+       <br/>
+diff --git a/pages/topics.tsx b/pages/topics.tsx
+index af61de0..820a13b 100644
+--- a/pages/topics.tsx
++++ b/pages/topics.tsx
+@@ -117,6 +117,8 @@ const Topics: NextFC<TopicsProps> = ({
+                   <Component
+                     key={section.system.id}
+                     data={section}
++                    dataArticles={section}
++                    dataBlogs={section}
+                   />
+                 );
+               })
+@@ -171,7 +173,10 @@ const Topics: NextFC<TopicsProps> = ({
+     if (topicList) {  
+         var { items } = await client.items().type('topic').getPromise(); // get all topics  
+        topicList.topic = items;
+-       //topicList.article = items;
++       var { items } = await client.items().type('article').getPromise(); // get all articles
++       topicList.article = items;
++       var { items } = await client.items().type('blog_post').getPromise(); // get all blogs
++       topicList.blog = items;
+     }
+ 
+     if (articleSection) {  // top 3 articles    
+-- 
+2.19.1.windows.1
+

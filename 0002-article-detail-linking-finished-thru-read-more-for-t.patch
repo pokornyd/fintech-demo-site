@@ -1,0 +1,283 @@
+From 8b147876854508dad504903f640201c3a0896260 Mon Sep 17 00:00:00 2001
+From: Boris Pocatko <boris.pocatko@gmail.com>
+Date: Wed, 22 Apr 2020 13:05:08 +1000
+Subject: [PATCH 02/14] article detail linking finished thru 'read more' for
+ top 3 and artile list
+
+---
+ .vscode/launch.json                           | 15 +++++++++
+ components/ElementValue.tsx                   |  2 +-
+ .../sections/article/ArticleDetailItem.tsx    | 33 +++++--------------
+ .../sections/article/ArticleListItem.tsx      | 24 ++++++++++----
+ .../sections/article/ArticleSectionItem.tsx   | 26 +++++++++++----
+ pages/article.tsx                             |  9 +++--
+ utilities/utils.ts                            |  5 +++
+ 7 files changed, 73 insertions(+), 41 deletions(-)
+ create mode 100644 .vscode/launch.json
+
+diff --git a/.vscode/launch.json b/.vscode/launch.json
+new file mode 100644
+index 0000000..f6b35a0
+--- /dev/null
++++ b/.vscode/launch.json
+@@ -0,0 +1,15 @@
++{
++    // Use IntelliSense to learn about possible attributes.
++    // Hover to view descriptions of existing attributes.
++    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
++    "version": "0.2.0",
++    "configurations": [
++        {
++            "type": "chrome",
++            "request": "launch",
++            "name": "Launch Chrome against localhost",
++            "url": "http://localhost:3000",
++            "webRoot": "${workspaceFolder}"
++        }
++    ]
++}
+\ No newline at end of file
+diff --git a/components/ElementValue.tsx b/components/ElementValue.tsx
+index 5c9a09c..c7ca7dd 100644
+--- a/components/ElementValue.tsx
++++ b/components/ElementValue.tsx
+@@ -64,7 +64,7 @@ export function getElementRenderer<T extends { readonly value: any }>(elementCod
+           <Render
+             ref={this.hoverable}
+             {...this.props}
+-            value={this.props.data[elementCodename].value}
++            value={elementCodename == 'system.codename' ? this.props.data.system.codename  : this.props.data[elementCodename].value}
+           />
+           {this.state.showOverlay && (
+             <EditElementOverlay
+diff --git a/components/sections/article/ArticleDetailItem.tsx b/components/sections/article/ArticleDetailItem.tsx
+index b3003ba..a44cfc6 100644
+--- a/components/sections/article/ArticleDetailItem.tsx
++++ b/components/sections/article/ArticleDetailItem.tsx
+@@ -24,42 +24,27 @@ const propTypes: ValidationMap<IArticleDetailItemProps> = {
+ 
+ const ArticleTitle = getItemElementRenderer(
+   'title',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <a
+-      ref={ref}
+-      className="article-title"
+-      href="#"
+-    >
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
++    <h1>
+       {value}
+-    </a>
++    </h1>
+   )),
+ );
+ 
+ const ArticleContent = getItemElementRenderer(
+   'content',
+   React.forwardRef<HTMLParagraphElement, IElementStringValue>(({ value }, ref) => (
+-    <p
++    <div
+       ref={ref}
+-      className="mb-0"
++      className="lead"
+     >
+       {stripPTags(value)}
+-    </p>
++    </div>
+   )),
+ );
+ 
+ 
+-const ArticleReadMore = getItemElementRenderer(
+-  'title',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <a
+-      ref={ref}
+-      className="article-title"
+-      href={value}
+-    >
+-      READ MORE
+-    </a>
+-  )),
+-);
++
+ 
+ 
+ export const ArticleDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) => {
+@@ -75,9 +60,7 @@ export const ArticleDetailItem: NextFC<IArticleDetailItemProps> = ({ data }) =>
+           <ArticleContent
+             data={data}
+           />
+-          <ArticleReadMore
+-            data={data}
+-          />
++          
+         </div>
+       </div>
+       <br/>
+diff --git a/components/sections/article/ArticleListItem.tsx b/components/sections/article/ArticleListItem.tsx
+index a83bb01..e7c6c55 100644
+--- a/components/sections/article/ArticleListItem.tsx
++++ b/components/sections/article/ArticleListItem.tsx
+@@ -25,13 +25,9 @@ const propTypes: ValidationMap<IArticleListItemProps> = {
+ const ArticleTitle = getItemElementRenderer(
+   'title',
+   React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <a
+-      ref={ref}
+-      className="article-title"
+-      href="#!"
+-    >
++    <h3>
+       {value}
+-    </a>
++    </h3>
+   )),
+ );
+ 
+@@ -47,6 +43,19 @@ const ArticleContent = getItemElementRenderer(
+   )),
+ );
+ 
++const ArticleReadMore = getItemElementRenderer(
++'system.codename',
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++    <a
++      ref={ref}
++      className="mb-0"
++      href={'/article?codename='+ value}
++    >
++      READ MORE
++    </a>
++  )),
++);
++
+ export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
+   return (
+     <div
+@@ -60,6 +69,9 @@ export const ArticleListItem: NextFC<IArticleListItemProps> = ({ data }) => {
+           <ArticleContent
+             data={data}
+           />
++          <ArticleReadMore
++            data={data}
++          />
+         </div>
+       </div>
+       <br/>
+diff --git a/components/sections/article/ArticleSectionItem.tsx b/components/sections/article/ArticleSectionItem.tsx
+index 117c008..3bf26fa 100644
+--- a/components/sections/article/ArticleSectionItem.tsx
++++ b/components/sections/article/ArticleSectionItem.tsx
+@@ -20,18 +20,14 @@ const propTypes: ValidationMap<IArticleSectionItemProps> = {
+   data: PropTypes.any.isRequired,
+ };
+ 
+-
+-
+ const ArticleTitle = getItemElementRenderer(
+   'title',
+-  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
+-    <a
+-      ref={ref}
++  React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }) => (
++    <h4
+       className="article-title"
+-      href="#!"
+     >
+       {value}
+-    </a>
++    </h4>
+   )),
+ );
+ 
+@@ -47,6 +43,19 @@ const ArticleContent = getItemElementRenderer(
+   )),
+ );
+ 
++const ArticleReadMore = getItemElementRenderer(
++  'system.codename',
++    React.forwardRef<HTMLAnchorElement, IElementStringValue>(({ value }, ref) => (
++      <a
++        ref={ref}
++        className="mb-0"
++        href={'/article?codename='+ value}
++      >
++        READ MORE
++      </a>
++    )),
++  );
++
+ export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) => {
+   return (
+     <div
+@@ -60,6 +69,9 @@ export const ArticleSectionItem: NextFC<IArticleSectionItemProps> = ({ data }) =
+           <ArticleContent
+             data={data}
+           />
++          <ArticleReadMore
++            data={data}
++          />
+         </div>
+       </div>
+     </div>
+diff --git a/pages/article.tsx b/pages/article.tsx
+index da9c16d..f35b037 100644
+--- a/pages/article.tsx
++++ b/pages/article.tsx
+@@ -25,6 +25,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
+ import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
+ import fetch from 'cross-fetch';
+ import { getProjectIdFromQuery } from '../utilities/utils';
++import { getCodenameFromQuery } from '../utilities/utils';
+ 
+ 
+ type Content = {
+@@ -40,6 +41,7 @@ type ArticlesProps = {
+   readonly isPreview: boolean;
+   readonly removeScrollbar: boolean;
+   readonly projectId: string;
++ 
+ }
+ 
+ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any> } = {
+@@ -72,7 +74,7 @@ const Articles: NextFC<ArticlesProps> = ({
+     navigation,
+     projectId,
+     removeScrollbar,
+-    sections,
++    sections
+   }) => {
+   
+     return (
+@@ -142,7 +144,10 @@ const Articles: NextFC<ArticlesProps> = ({
+       previewApiKey: isPreview ? await getProjectApiKey(projectId, hostname || '') : '',
+     });
+     const { debug: forget1, ...content } = await client.item('article_detail').withParameter('depth', '10').getPromise();
+-    const { items } = await client.items().type('article').equalsFilter('system.codename','not_only_your_insurance_partner').limitParameter(1).getPromise(); 
++
++    const codename = getCodenameFromQuery(query);
++    
++    const { items } = await client.items().type('article').equalsFilter('system.codename',codename).limitParameter(1).getPromise(); 
+     
+     const linkedItemsByCodename = content.linkedItems.reduce((map: ItemMap, contentItem: ContentItem) => {
+       return {
+diff --git a/utilities/utils.ts b/utilities/utils.ts
+index 85371ca..f4becba 100644
+--- a/utilities/utils.ts
++++ b/utilities/utils.ts
+@@ -10,6 +10,11 @@ export const getBlogCodenameFromQuery = (query: Record<string, string | string[]
+   return (query.name) as string;
+ };
+ 
++export const getCodenameFromQuery = (query: Record<string, string | string[] | undefined>): string => {
++  return (query.codename) as string;
++};
++
++
+ export const addClassToPTags = (html: string, className: string) => {
+   const replacement = `<p class="${className}">`;
+   return html.replace(/< *p *>/g, replacement);
+-- 
+2.19.1.windows.1
+
