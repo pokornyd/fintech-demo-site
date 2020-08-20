@@ -68,11 +68,11 @@ export const NavigationMenu: NextFC<INavigationMenuProps> = ({ navigation, query
         id="navbarCollapse"
       >
         <ul className="navbar-nav ml-auto">
-          {navigation.sub_items.map((navigationItem: ContentItem) => (
+          {navigation.subpages.map((navigationItem: ContentItem) => (
             <NavMenuLink
               key={navigationItem.system.id}
               data={navigationItem}
-              subItems={navigationItem.sub_items}
+              subItems={navigationItem.subpages}
               url={navigationItem.url.value + addPersistentProjId(query)}              
             />
           ))}

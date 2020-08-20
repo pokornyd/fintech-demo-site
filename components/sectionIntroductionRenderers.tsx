@@ -36,3 +36,15 @@ export const Title = getElementRenderer(
     </h2>
   )),
 );
+
+export const Form = getElementRenderer(
+  "section_introduction__form_selector",
+  React.forwardRef<HTMLDivElement, IElementStringValue>(({ value }, ref) => (
+    <div
+      ref={ref}
+      dangerouslySetInnerHTML={{
+        __html: JSON.parse(value).publish.embed_code,
+      }}
+    />
+  ))
+);
