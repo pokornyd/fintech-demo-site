@@ -42,7 +42,7 @@ export interface ITopicListStateProps {
         runCarousel(this.carouselRef.current);
       }
       const { data } = this.props;
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && data.elements.contact_form.value !== null) {
         var tmp = document.createElement("div");
         tmp.innerHTML = JSON.parse(
           data.elements.contact_form.value
