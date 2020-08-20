@@ -30,6 +30,10 @@ export interface ITopicListStateProps {
   export class ContactUs extends React.PureComponent<ITopicListProps> {
     static displayName = 'TopicList';
     static propTypes = propTypes;
+    constructor(props: Readonly<ITopicListProps>) {
+      super(props);
+      this.state = { formConfiguration: JSON.parse(this.props.data.elements.contact_form.value) }
+    }
   
     private readonly carouselRef = React.createRef<HTMLDivElement>();
   
@@ -37,42 +41,46 @@ export interface ITopicListStateProps {
       if (this.carouselRef.current) {
         runCarousel(this.carouselRef.current);
       }
+      const { data } = this.props;
+      if (typeof window !== "undefined") {
+        var tmp = document.createElement("div");
+        tmp.innerHTML = JSON.parse(
+          data.elements.contact_form.value
+        ).publish.embed_code;
+        var script = tmp.getElementsByTagName("script")[0];
+        var src = script.src;
+        $.getScript(src)
+          .done(function (script, textStatus) {
+            $(".title").append(
+              JSON.parse(data.elements.contact_form.value).publish
+                .embed_code
+            );
+          })
+          .fail(function (jqxhr, settings, exception) {
+            $("div.log").text("Triggered ajaxError handler.");
+          });
+      }
     }
   
     render() {
       const { data, query } = this.props;
-      var formConfiguration = JSON.parse(data.elements.contact_form.value);
-      console.log(formConfiguration);
       return (
-        <section className="topic-list" >
+        <section className="topic-list">
           <div className="container">
             <div className="row">
               <div className="mx-auto">
                 <div className="title text-center">
-                  <PreTitle
-                    data={data}
-                  />
-                  <Title
-                    data={data}
-                  />
-                  <Description
-                    data={data}
-                  />
+                  <PreTitle data={data} />
+                  <Title data={data} />
+                  <Description data={data} />
                 </div>
               </div>
             </div>
-            <div id="apply_form">
-            <div style={{ width: "50%", margin: "auto", textAlign: "center" }} dangerouslySetInnerHTML={{ __html: formConfiguration.publish.embed_code }} />
-          </div>
             <div className="row">
               <div className="col-md-12">
-                </div>
+              </div>
             </div>
-            <div>
-
-        </div>
-      </div>
-          
+          </div>
         </section>
       );
     }
