@@ -24,6 +24,7 @@ import { ContentItemElementContext } from '../components/context/ContentItemElem
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
 import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
+import { ContactUs } from '../components/sections/contactUs/ContactUs';
 
 
 type Content = {
@@ -47,6 +48,7 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_about_us': AboutUsSection,
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
+  'section_contact_us': ContactUs,
   'section_blog': BlogsBlogSection,
   'section_blog_list': BlogList
 };

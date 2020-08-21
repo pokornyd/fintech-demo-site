@@ -1,6 +1,7 @@
 import React from 'react';
 import { addClassToPTags } from '../utilities/utils';
 import { getElementRenderer } from './ElementValue';
+import { IFormEmbedConfig } from './sections/contactUs/ContactUs';
 
 export const Description = getElementRenderer(
   'section_introduction__description',
@@ -38,7 +39,7 @@ export const Title = getElementRenderer(
 );
 
 export const Form = getElementRenderer(
-  "section_introduction__form_selector",
+  "contact_form",
   React.forwardRef<HTMLDivElement, IElementStringValue>(({ value }, ref) => (
     <div
       ref={ref}
@@ -48,3 +49,14 @@ export const Form = getElementRenderer(
     />
   ))
 );
+
+// export function Form(props) {
+//   console.log(props)
+//   return(
+//         <div
+//       dangerouslySetInnerHTML={{
+//         __html: props.data.embed_code,
+//       }}
+//     />
+//   )
+// }
