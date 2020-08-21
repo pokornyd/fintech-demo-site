@@ -26,6 +26,7 @@ import { getCodenameFromQuery } from '../utilities/utils';
 import { BlogDetail} from '../components/sections/blog/BlogDetail'
 import { BlogsBlogSection } from '../components/sections/blog/BlogsBlogSection';
 import { RecommendationClient } from '@kentico/kontent-recommendations';
+import { ContactUs } from '../components/sections/contactUs/ContactUs';
 
 
 type Content = {
@@ -50,7 +51,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
   'section_blog': BlogsBlogSection,
-  'section_blog_list': BlogDetail
+  'section_blog_list': BlogDetail,
+  'section_contact_us': ContactUs
 };
 
 const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {

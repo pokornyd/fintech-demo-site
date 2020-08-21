@@ -25,6 +25,7 @@ import { PreviewContext } from '../components/context/PreviewContext';
 import { ContentItemElementContext } from '../components/context/ContentItemElementContext';
 import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
+import { ContactUs } from '../components/sections/contactUs/ContactUs';
 
 
 type Content = {
@@ -50,7 +51,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_highlighted_features': ServiceSection,
   'section_articles': ArticleSection,
   'section_article_list': ArticleList,
-  'section_topic_list': TopicList
+  'section_topic_list': TopicList,
+  'section_contact_us': ContactUs
 };
 
 export const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {

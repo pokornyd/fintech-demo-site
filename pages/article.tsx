@@ -26,6 +26,7 @@ import fetch from 'cross-fetch';
 import { getProjectIdFromQuery } from '../utilities/utils';
 import { getCodenameFromQuery } from '../utilities/utils';
 import { RecommendationClient } from '@kentico/kontent-recommendations';
+import { ContactUs } from '../components/sections/contactUs/ContactUs';
 
 
 type Content = {
@@ -51,7 +52,8 @@ const SectionRendererMap: { [contentType: string]: ComponentClass<any> | FC<any>
   'section_hero_unit': Header,
   'section_highlighted_features': ServiceSection,
   'section_articles': ArticleSection,
-  'section_article_list': ArticleDetail
+  'section_article_list': ArticleDetail,
+  'section_contact_us': ContactUs
 };
 
 const getProjectApiKey = async (projectId: string, hostname: string): Promise<string | undefined> => {
