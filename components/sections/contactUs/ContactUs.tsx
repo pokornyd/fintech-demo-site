@@ -45,6 +45,7 @@ export interface ITopicListStateProps {
         runCarousel(this.carouselRef.current);
       }
       const { data } = this.props;
+
   // if (typeof window !== 'undefined') {
   //     var test: IFormEmbedConfig = JSON.parse(data.elements.contact_form.value).publish;
   //     const formElement = document.getElementById("form")
@@ -70,7 +71,7 @@ export interface ITopicListStateProps {
       const { data, query } = this.props;
       // var test: IFormEmbedConfig = JSON.parse(data.elements.contact_form.value).publish;
       return (
-        <section className="topic-list" >
+        <section className="topic-list">
           <div className="container">
             <div className="row">
               <div className="mx-auto">
@@ -91,7 +92,6 @@ export interface ITopicListStateProps {
               </div>
             </div>
       </div>
-          
         </section>
       );
     }
